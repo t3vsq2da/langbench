@@ -6,6 +6,7 @@ export default class Test {
     Object.entries(data).forEach(([k, v]) => (this[k] = v));
   }
   run(cmd) {
+    // в tmp директории!
     log("c", cmd);
   }
 }

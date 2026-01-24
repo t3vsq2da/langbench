@@ -16,11 +16,12 @@
   "elixir":{
     "folder":"elixir",
     "multicore":true,
-    "build":"elixirc --no-debug-info -o /tmp <src> ",
-    "buildSize":"wc -c < /tmp/Elixir.Main.beam",
-    "run":"elixir --erl \"+S $(nproc) +A 1 +sbt u +sub true -smp enable\" -pa /tmp -e \"Main.main()\" -- "
+    "build":"elixirc --no-debug-info <src>",
+    "//":"'out' is used ONLY for measuring the file size.",
+    "out":"Elixir.Main.beam",
+    "run":"elixir --erl \"+S $(nproc) +A 1 +sbt u +sub true -smp enable\" -e \"Main.main()\" -- "
   },
-  "haskell":{
+  "--haskell":{
     "folder":"hs",
     "ext":"hs",
     "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>"
@@ -45,14 +46,15 @@
     "folder":"js",
     "run":"node --no-concurrent-sweeping --predictable --max-old-space-size=4096 <src>"
   },
-  "--denoJS":{
+  "denoJS":{
     "folder":"js",
     "TODO":" поправить, чтобы оверхед от sh (если он ваще есть) не учитывался в buildTime ",
-    "build":"sh -c 'deno compile --unstable --allow-read --allow-write --output <out> <src> 2>/dev/null'"
+    "build":"deno compile --unstable --quiet --allow-read --allow-write --output <out> <src>"
   },
   "nim":{
     "folder":"nim",
-    "build":"sh -c 'nim c -d:release --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src> 2>/dev/null'"
+    "comment":"",
+    "build":"nim c -d:release --verbosity:0 --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src>"
   },
   "go":{
     "folder":"go",

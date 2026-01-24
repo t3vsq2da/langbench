@@ -1,6 +1,7 @@
 import {
   pipe,
   _,
+  pwd,
   msgs,
   isSet,
   ALL,
@@ -16,6 +17,7 @@ import {
   setLog,
   log,
   exec,
+  statCmd,
 } from "./langbench/utils.mjs";
 import LaunchOptions from "./langbench/launchOptions.mjs";
 import fs, { readdirSync } from "node:fs";
@@ -28,16 +30,16 @@ const langs = { l1: 1, l2: 2 };
 
 const launchOptions = new LaunchOptions(process.argv);
 
-setLog((head, tail) => {
-  if (tail == null) {
+setLog((head, ...tail) => {
+  if (isEmpty(tail)) {
     console.log(head);
     return head;
   } else if (launchOptions["l" + head]) {
     const prefix = log.prefixs[head];
-    if (prefix) console.log(prefix, tail);
+    if (prefix) console.log(prefix, ...tail);
     else console.log(tail);
-    return tail;
   }
+  return tail.at(-1);
 });
 
 log.prefixs = {
@@ -75,22 +77,24 @@ async function main() {
   });
 
   if (launchOptions.l[0] === ALL) launchOptions.l = Object.keys(rawLangs);
-  else if (log("d", launchOptions.l).some(lName => !(lName in rawLangs)))
+  else if (launchOptions.l.some(lName => !(lName in rawLangs)))
     throw new LBError(msgs.validArgFail("-l", launchOptions.l));
 
   if (launchOptions.t[0] === ALL) launchOptions.t = Object.keys(rawTests);
-  else if (log(launchOptions.t).some(tName => !(tName in rawTests)))
+  else if (launchOptions.t.some(tName => !(tName in rawTests)))
     throw new LBError(msgs.validArgFail("-t", launchOptions.t));
 
   log("s", "init tests&langs");
   const tests = log(
     "d",
+    "processed tests",
     Object.entries(rawTests)
       .filter(([t]) => launchOptions.t.includes(t))
       .map(e => new Test(...e))
   );
   const langs = log(
     "d",
+    "processed langs",
     Object.entries(rawLangs)
       .filter(([l]) => launchOptions.l.includes(l))
       .map(e => new Lang(...e))
@@ -98,13 +102,25 @@ async function main() {
 
   //log("d", langs);
   //log("d", tests);
-
+  fs.rmSync("tmp", { recursive: true, force: true });
+  fs.mkdirSync("tmp");
   for (const test of tests) {
     log("s", `start test ${test.name}`);
+    const src = test.src;
     for (const lang of langs) {
-      //log("d", "src:" + lang.getSrc(test.src));
+      pwd.toTmp();
+
+      let buildStat;
+      if (lang.build) buildStat = await lang.buildStat(src);
+      console.log(buildStat);
+      fs.rmSync(lang.out ?? src);
+
+      //const exe = await lang.getSrc(test.src);
+      //log("p", "src:" + exe);
     }
   }
+  if (fs.existsSync("tmp")) fs.rmdirSync("tmp");
+  process.chdir("../");
 }
 try {
   main();
