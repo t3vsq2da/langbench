@@ -7,22 +7,31 @@ export const _ = Symbol("placeholder");
 export const ALL = Symbol("all");
 
 export const msgs = {
-  validArgFail:(flag,values)=>`setting '${flag}' was passed an argument(s) '${
-            Array.isArray(values) ? values.join(" ") : values
-          }' that failed validation.`,
-  noFlag:()=>`a flag (option) must be specified before the values.`,
-  undefinedFlag:(flag)=>`unknown flag '${flag}'`,
-}
+  validArgFail: (flag, values) =>
+    `setting '${flag}' was passed an argument(s) '${
+      Array.isArray(values) ? values.join(" ") : values
+    }' that failed validation.`,
+  noFlag: () => `a flag (option) must be specified before the values`,
+  undefinedFlag: flag => `unknown flag '${flag}'`,
+  incorrectType: (func, type, value) =>
+    `@incorrectType: func:'${func}'\n expected:'${type}'\n value:'${value}'\n recivedType:'${typeof value}'`,
+  srcNoFound: (lang, name) =>
+    `file ${name} for language ${lang} was not found.`,
+  specifyExt: lang =>
+    `The source file of language ${lang} could not be identified. Specify the extension in the language configuration`,
+};
 
 export class LBError extends Error {
   constructor(msg) {
     super(msg);
     this.name = "LangBenchError";
-    console.error(msg, "\n");
+    //console.error(msg, "\n");
   }
 }
 
-export const isSet = arr=>[...new Set(arr)].length===arr.length
+export const needLen = len => v => v.length === len;
+
+export const isSet = arr => [...new Set(arr)].length === arr.length;
 
 export const partial =
   (fn, ...preset) =>
@@ -43,6 +52,8 @@ export const autoCast = value => {
   else return value;
 };
 
+export const realType = value => typeof value;
+
 export const typeOf = value => {
   if (typeof value !== "string") return typeof value;
   else if (value === "") return "string";
@@ -58,7 +69,6 @@ export const inRange = (min, max, inclusive) => v =>
   v >= min && (inclusive === true ? v <= max : v < max);
 export const head = a => a[0];
 
-
 export const isEmpty = v =>
   v === null ||
   v === undefined ||
@@ -67,29 +77,43 @@ export const isEmpty = v =>
 
 import { exec as nodeExec } from "node:child_process";
 
-import { spawn } from 'child_process';
+import { spawn } from "child_process";
 
-export const gExec = log=>cmd=>{
+export const exec = cmd => {
   return new Promise((resolve, reject) => {
-    log('c',cmd.trim())
-    
+    log("c", cmd.trim());
+
     const child = spawn(cmd, [], {
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ["pipe", "pipe", "pipe"],
     });
 
-    let stdout = '';
-    let stderr = '';
+    let stdout = "";
+    let stderr = "";
 
-    child.stdout.on('data', data => 
-      stdout += data.toString()
-    );
+    child.stdout.on("data", data => (stdout += data.toString()));
 
-    child.stderr.on('data', data => 
-      stderr += data.toString());
+    child.stderr.on("data", data => (stderr += data.toString()));
 
-    child.on('error', reject);
+    child.on("error", reject);
 
-    child.on('close', (code) => 
-      resolve({ stdout, stderr, code }));
+    child.on("close", code => resolve({ stdout, stderr, code }));
   });
-}
+};
+
+export const throwError = e => {
+  throw e;
+};
+
+export const opposite = v =>
+  realType(v) === "boolean"
+    ? !v
+    : throwError(new LBError(msgs.incorrectType("opposite", "boolean", v)));
+
+export const map =
+  (...funcs) =>
+  a =>
+    a.map(pipe(...funcs));
+
+let _log = (...msg) => (console.log("BASELOG:", ...msg), msg[0]);
+export const log = (...a) => _log(...a);
+export const setLog = l => (_log = l);

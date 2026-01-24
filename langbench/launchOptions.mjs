@@ -13,6 +13,10 @@ import {
   head,
   isEmpty,
   LBError,
+  map,
+  log,
+  needLen,
+  opposite,
 } from "./utils.mjs";
 
 const coreCount = () => (console.log("TODO CORE COUNT"), 4);
@@ -61,13 +65,15 @@ class LaunchOptions {
     //log individual tests | выводит результаты каждого теста
     li: isType("boolean"),
     //tests
-    t: tNames =>
-      isSet(tNames) &&
-      tNames.every(tName => Object.keys(tests).includes(tName)),
+    t: pipe(
+      map(v => v.toString().trim()),
+      every(isSet, pipe(isEmpty, opposite))
+    ),
     //langs
-    l: lNames =>
-      isSet(lNames) &&
-      lNames.every(lName => Object.keys(langs).includes(lName)),
+    l: pipe(
+      map(v => v.toString().trim()),
+      every(isSet, pipe(isEmpty, opposite))
+    ),
     //dif
     d: isType("boolean"),
     //attemps count
@@ -102,5 +108,4 @@ class LaunchOptions {
   };
 }
 
-const launchOptions = new LaunchOptions(process.argv);;
-export default launchOptions ;
+export default LaunchOptions;
