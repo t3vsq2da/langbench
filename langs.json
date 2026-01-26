@@ -3,7 +3,7 @@
     "folder":"cpp",
     "build":"g++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
-  "cpp clang":{
+  "--cpp clang":{
     "folder":"cpp",
     "build":"clang++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
@@ -13,7 +13,7 @@
     "build":"elixirc --no-debug-info -o /tmp <src> ",
     "run":"elixir --erl \"+S 1 +A 1 +sbt u +sub true -smp enable\" -pa /tmp -e \"Main.main()\" -- "
   },
-  "elixir":{
+  "--elixir":{
     "folder":"elixir",
     "multicore":true,
     "build":"elixirc --no-debug-info <src>",
@@ -26,7 +26,7 @@
     "ext":"hs",
     "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>"
   },
-  "rust":{
+  "--rust":{
     "folder":"rust",
     "build":"rustc -C opt-level=3 -C target-cpu=native -C lto=fat -C codegen-units=1 -C panic=abort <src> -o <out>"
   },
@@ -46,17 +46,16 @@
     "folder":"js",
     "run":"node --no-concurrent-sweeping --predictable --max-old-space-size=4096 <src>"
   },
-  "denoJS":{
+  "--denoJS":{
     "folder":"js",
-    "TODO":" поправить, чтобы оверхед от sh (если он ваще есть) не учитывался в buildTime ",
     "build":"deno compile --unstable --quiet --allow-read --allow-write --output <out> <src>"
   },
-  "nim":{
+  "--nim":{
     "folder":"nim",
     "comment":"",
     "build":"nim c -d:release --verbosity:0 --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src>"
   },
-  "go":{
+  "--go":{
     "folder":"go",
     "build":"go build -ldflags=\"-s -w\" -trimpath -o <out> <src>"
   }

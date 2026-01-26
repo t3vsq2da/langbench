@@ -19,16 +19,28 @@ export const msgs = {
     `file ${name} for language ${lang} was not found.`,
   specifyExt: lang =>
     `The source file of language ${lang} could not be identified. Specify the extension in the language configuration`,
-  incorretOutput: (
+  undefinedTest: name => `unrecognized test name '${name}'`,
+  undefinedLang: name => `unrecognized lang name '${name}'`,
+  incorrectOutput: (
     cmd,
     stdout,
     stderr,
     code
   ) => `incorrect output when running the command
 cmd:'${cmd}' code:'${code}'
-[stdout-start]\n${stdout}\n[stdout-end]
-[stderr-start]\n${stderr}\n[stderr-end]
+${stdout != null ? `[stdout-start]\n${stdout}\n[stdout-start]` : ""}
+${stderr.trim() != null ? `[stderr-start]\n${stderr}\n[stderr-end]` : ""}
 `,
+  incorrectRes: (
+    testName,
+    cmd,
+    code,
+    expected,
+    stdout
+  ) => `incorrect result when performing test '${testName}'
+cmd:'${cmd}' code:'${code}'
+[expected-stdout-start]\n${expected}\n[expected-stdout-end]
+[stdout-start]\n${stdout}\n[stdout-start]`,
 };
 
 export class LBError extends Error {
@@ -91,7 +103,7 @@ export const exec = (cmd, args) => {
   return new Promise((resolve, reject) => {
     if (args == null) args = [];
     else if (typeof args === "string") args = [args];
-    log("c", [cmd, ...args].join(" "));
+    log("c", "(", process.cwd(), ")", [cmd, ...args].join(" "));
     const child = spawn(cmd, args, {
       stdio: ["pipe", "pipe", "pipe"],
     });
@@ -135,17 +147,22 @@ export const statCmd = async (cmd, args) => {
 
   args.unshift("-f", "'%U %S %M %P'", cmd);
   cmd = "/usr/bin/time";
-
+  log("d", "stat", cmd, args);
   const { stdout, stderr, code } = await exec(cmd, args);
 
-  const splitted = stderr.split(" ");
+  const splitted = stderr.replace(/^'|'$/, "").split(" ");
   if (splitted.length != 4)
     throw new LBError(
-      msgs.incorretOutput(cmd + " " + args.join(" "), stdout, stderr, code)
+      msgs.incorrectOutput(cmd + " " + args.join(" "), stdout, stderr, code)
     );
 
   const [utime, stime, mem, percen] = splitted;
-  return { stdout, stat: { time: utime + stime, mem, percen }, code };
+  console.log("||||", stime, utime, Number(stime), Number(utime));
+  return {
+    stdout,
+    stat: { time: Number(utime) + Number(stime), mem, percen },
+    code,
+  };
 };
 
 export const pwd = {
@@ -191,4 +208,24 @@ export const splitCmd = str => {
   //log("d", "splitCmd", '"' + str + '"', args);
   if (current !== "") args.push(current);
   return args;
+};
+
+export const excludeDisabled = obj => {
+  for (let key in obj) {
+    if (key.startsWith("--")) {
+      delete obj[key];
+      continue;
+    } else if (key.startsWith("++"))
+      if (launchOptions.fm) {
+        delete obj[key];
+        continue;
+      } else {
+        obj[key.slice(2)] = obj[key];
+        delete obj[key];
+        key = key.slice(2);
+      }
+
+    if (isType("object")(obj[key])) obj[key] = excludeDisabled(obj[key]);
+  }
+  return obj;
 };

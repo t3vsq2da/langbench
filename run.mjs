@@ -44,7 +44,7 @@ setLog((head, ...tail) => {
 
 log.prefixs = {
   w: "[!]", //warn
-  i: "", //individual
+  i: "[+]", //individual
   s: "[#]", //stage
   c: "[$]", //command
   a: "[~]", //attempt
@@ -52,73 +52,51 @@ log.prefixs = {
 };
 
 async function main() {
-  const rawTests = JSON.parse(fs.readFileSync("./tests.json"));
-  const rawLangs = JSON.parse(fs.readFileSync("./langs.json"));
-
-  log("s", "parse configs");
-  [rawTests, rawLangs].forEach(function exclude(obj) {
-    for (let key in obj) {
-      if (key.startsWith("--")) {
-        delete obj[key];
-        continue;
-      } else if (key.startsWith("++"))
-        if (launchOptions.fm) {
-          delete obj[key];
-          continue;
-        } else {
-          obj[key.slice(2)] = obj[key];
-          delete obj[key];
-          key = key.slice(2);
-        }
-
-      if (isType("object")(obj[key])) obj[key] = exclude(obj[key]);
-    }
-    return obj;
-  });
-
-  if (launchOptions.l[0] === ALL) launchOptions.l = Object.keys(rawLangs);
-  else if (launchOptions.l.some(lName => !(lName in rawLangs)))
-    throw new LBError(msgs.validArgFail("-l", launchOptions.l));
-
-  if (launchOptions.t[0] === ALL) launchOptions.t = Object.keys(rawTests);
-  else if (launchOptions.t.some(tName => !(tName in rawTests)))
-    throw new LBError(msgs.validArgFail("-t", launchOptions.t));
-
   log("s", "init tests&langs");
-  const tests = log(
-    "d",
-    "processed tests",
-    Object.entries(rawTests)
-      .filter(([t]) => launchOptions.t.includes(t))
-      .map(e => new Test(...e))
+  const tests = Test.getEnabled(
+    JSON.parse(fs.readFileSync("./tests.json")),
+    launchOptions.t
   );
-  const langs = log(
-    "d",
-    "processed langs",
-    Object.entries(rawLangs)
-      .filter(([l]) => launchOptions.l.includes(l))
-      .map(e => new Lang(...e))
+  const langs = Lang.getEnabled(
+    JSON.parse(fs.readFileSync("./langs.json")),
+    launchOptions.l
   );
+
+  Test.attempts = launchOptions.ac;
 
   //log("d", langs);
   //log("d", tests);
   fs.rmSync("tmp", { recursive: true, force: true });
   fs.mkdirSync("tmp");
+
   for (const test of tests) {
     log("s", `start test ${test.name}`);
-    const src = test.src;
     for (const lang of langs) {
       pwd.toTmp();
 
       let buildStat;
-      if (lang.build) buildStat = await lang.buildStat(src);
-      console.log(buildStat);
-      fs.rmSync(lang.out ?? src);
+      console.log("||", test.src);
+      let src;
+      let cmdRun;
+      if (lang.build) {
+        buildStat = await lang.buildStat(test.src);
+        cmdRun = lang.run?.replace("<src>", test.src) ?? "./" + test.src;
+      } else
+        cmdRun = lang.run?.replace(
+          "<src>",
+          path.join("../", lang.findSrc(test.src))
+        );
+
+      console.log(lang.name, test.name, await test.bench(cmdRun));
+      pwd.toTmp();
+      console.log(">>", test.src);
+      fs.rmSync(lang.out ?? test.src, { force: true });
 
       //const exe = await lang.getSrc(test.src);
       //log("p", "src:" + exe);
     }
   }
+
   if (fs.existsSync("tmp")) fs.rmdirSync("tmp");
   process.chdir("../");
 }
