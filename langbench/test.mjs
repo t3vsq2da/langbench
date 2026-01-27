@@ -8,6 +8,7 @@ import {
   LBError,
   splitCmd,
   ALL,
+  exec,
 } from "./utils.mjs";
 
 export default class Test {
@@ -19,26 +20,22 @@ export default class Test {
     Object.entries(data).forEach(([k, v]) => (this[k] = v));
   }
 
-  static getEnabled = (rawTests, names) => {
-    excludeDisabled(rawTests);
+  static getEnabled = (rawTests, names, fm) => {
+    excludeDisabled(rawTests, fm);
 
     let entries = Object.entries(rawTests);
 
     if (names[0] !== ALL) {
-      const undefinedTest = names.find(tName => !(tName in names));
+      const undefinedTest = names.find(tName => !(tName in rawTests));
       if (undefinedTest != null)
         throw new LBError(msgs.undefinedTest(undefinedTest));
       else entries = entries.filter(([name]) => names.includes(name));
     }
 
-    return log(
-      "d",
-      "tests",
-      entries.map(([name, data]) => new Test(name, data))
-    );
+    return entries.map(([name, data]) => new Test(name, data));
   };
 
-  async bestStat(cmd, input, expectedOut) {
+  async bestStat(cmd, input, expectedOut, lName) {
     if (input) cmd += " " + input;
     cmd = splitCmd(cmd);
     let best;
@@ -46,8 +43,11 @@ export default class Test {
     for (let i = 0; i < Test.attempts; ++i) {
       pwd.toTmp();
       const { stdout, stat, code } = await statCmd(cmd[0], cmd.slice(1));
-      log("a", this.name, stat);
-
+      log(
+        "a",
+        `${this.name}[${input}] attempt ${i + 1}/${Test.attempts} : ` +
+          msgs.formatStat.stat(stat)
+      );
       if (
         expectedOut != null &&
         stdout.toString().trim() != expectedOut.toString().trim()
@@ -61,15 +61,20 @@ export default class Test {
     return best;
   }
 
-  async bench(cmd) {
+  async bench(cmd, lName) {
     const stats = {};
 
-    if (this.asserts) {
+    if (this.asserts && Object.keys(this.asserts).length) {
       for (const input in this.asserts) {
-        stats[input] = await this.bestStat(cmd, input, this.asserts[input]);
+        stats[input] = await this.bestStat(
+          cmd,
+          input,
+          this.asserts[input],
+          lName
+        );
       }
     } else {
-      stats[""] = await this.bestStat(cmd);
+      stats[""] = await this.bestStat(cmd, null, null, lName);
     }
     return stats;
   }

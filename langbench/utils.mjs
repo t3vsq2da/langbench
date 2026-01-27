@@ -1,3 +1,5 @@
+import msgs from "./msgs.mjs";
+
 export const pipe =
   (...funcs) =>
   arg =>
@@ -6,42 +8,7 @@ export const pipe =
 export const _ = Symbol("placeholder");
 export const ALL = Symbol("all");
 
-export const msgs = {
-  validArgFail: (flag, values) =>
-    `setting '${flag}' was passed an argument(s) '${
-      Array.isArray(values) ? values.join(" ") : values
-    }' that failed validation.`,
-  noFlag: () => `a flag (option) must be specified before the values`,
-  undefinedFlag: flag => `unknown flag '${flag}'`,
-  incorrectType: (func, type, value) =>
-    `@incorrectType: func:'${func}'\n expected:'${type}'\n value:'${value}'\n recivedType:'${typeof value}'`,
-  srcNoFound: (lang, name) =>
-    `file ${name} for language ${lang} was not found.`,
-  specifyExt: lang =>
-    `The source file of language ${lang} could not be identified. Specify the extension in the language configuration`,
-  undefinedTest: name => `unrecognized test name '${name}'`,
-  undefinedLang: name => `unrecognized lang name '${name}'`,
-  incorrectOutput: (
-    cmd,
-    stdout,
-    stderr,
-    code
-  ) => `incorrect output when running the command
-cmd:'${cmd}' code:'${code}'
-${stdout != null ? `[stdout-start]\n${stdout}\n[stdout-start]` : ""}
-${stderr.trim() != null ? `[stderr-start]\n${stderr}\n[stderr-end]` : ""}
-`,
-  incorrectRes: (
-    testName,
-    cmd,
-    code,
-    expected,
-    stdout
-  ) => `incorrect result when performing test '${testName}'
-cmd:'${cmd}' code:'${code}'
-[expected-stdout-start]\n${expected}\n[expected-stdout-end]
-[stdout-start]\n${stdout}\n[stdout-start]`,
-};
+export { default as msgs } from "./msgs.mjs";
 
 export class LBError extends Error {
   constructor(msg) {
@@ -95,18 +62,20 @@ export const isEmpty = v =>
   (typeof v === "string" && !v.length) ||
   (typeof v === "object" && !Object.keys(v).length);
 
-import { exec as nodeExec } from "node:child_process";
-
 import { spawn } from "child_process";
+import fs from "fs";
 
-export const exec = (cmd, args) => {
+export const exec = (cmd, args, pidCb) => {
   return new Promise((resolve, reject) => {
     if (args == null) args = [];
     else if (typeof args === "string") args = [args];
+
     log("c", "(", process.cwd(), ")", [cmd, ...args].join(" "));
+
     const child = spawn(cmd, args, {
       stdio: ["pipe", "pipe", "pipe"],
     });
+    pidCb?.(child.pid);
 
     let stdout = "";
     let stderr = "";
@@ -145,22 +114,24 @@ export const statCmd = async (cmd, args) => {
   if (args == null) args = [];
   else if (typeof args === "string") args = [args];
 
-  args.unshift("-f", "'%U %S %M %P'", cmd);
-  cmd = "/usr/bin/time";
-  log("d", "stat", cmd, args);
+  const cmdSplitted = splitCmd(
+    `/usr/bin/time -f "%U %S %M %P" ${cmd} ${args.join(" ")}`
+  );
+  cmd = cmdSplitted[0];
+  args = cmdSplitted.slice(1);
+
   const { stdout, stderr, code } = await exec(cmd, args);
 
-  const splitted = stderr.replace(/^'|'$/, "").split(" ");
-  if (splitted.length != 4)
+  const splittedRes = stderr.replace(/^'|'$/, "").split(" ");
+  if (splittedRes.length != 4)
     throw new LBError(
       msgs.incorrectOutput(cmd + " " + args.join(" "), stdout, stderr, code)
     );
 
-  const [utime, stime, mem, percen] = splitted;
-  console.log("||||", stime, utime, Number(stime), Number(utime));
+  const [utime, stime, mem, cpu] = splittedRes;
   return {
     stdout,
-    stat: { time: Number(utime) + Number(stime), mem, percen },
+    stat: { time: Number(utime) + Number(stime), mem, cpu },
     code,
   };
 };
@@ -205,18 +176,17 @@ export const splitCmd = str => {
 
     i++;
   }
-  //log("d", "splitCmd", '"' + str + '"', args);
   if (current !== "") args.push(current);
   return args;
 };
 
-export const excludeDisabled = obj => {
+export const excludeDisabled = (obj, fm) => {
   for (let key in obj) {
     if (key.startsWith("--")) {
       delete obj[key];
       continue;
     } else if (key.startsWith("++"))
-      if (launchOptions.fm) {
+      if (fm) {
         delete obj[key];
         continue;
       } else {

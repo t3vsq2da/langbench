@@ -1,10 +1,12 @@
 {
   "cpp gcc":{
     "folder":"cpp",
+    "req":["g++"],
     "build":"g++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
-  "--cpp clang":{
+  "cpp clang":{
     "folder":"cpp",
+    "req":["clang++"],
     "build":"clang++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
   "--elixir onecore":{
@@ -21,12 +23,12 @@
     "out":"Elixir.Main.beam",
     "run":"elixir --erl \"+S $(nproc) +A 1 +sbt u +sub true -smp enable\" -e \"Main.main()\" -- "
   },
-  "--haskell":{
+  "haskell":{
     "folder":"hs",
     "ext":"hs",
     "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>"
   },
-  "--rust":{
+  "rust":{
     "folder":"rust",
     "build":"rustc -C opt-level=3 -C target-cpu=native -C lto=fat -C codegen-units=1 -C panic=abort <src> -o <out>"
   },
@@ -42,7 +44,7 @@
     "folder":"perl",
     "run":"perl <src>"
   },
-  "--nodeJS":{
+  "nodeJS":{
     "folder":"js",
     "run":"node --no-concurrent-sweeping --predictable --max-old-space-size=4096 <src>"
   },

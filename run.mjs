@@ -1,27 +1,7 @@
-import {
-  pipe,
-  _,
-  pwd,
-  msgs,
-  isSet,
-  ALL,
-  partial,
-  every,
-  autoCast,
-  typeOf,
-  isType,
-  inRange,
-  head,
-  isEmpty,
-  LBError,
-  setLog,
-  log,
-  exec,
-  statCmd,
-} from "./langbench/utils.mjs";
+import { pwd, msgs, isEmpty, setLog, log } from "./langbench/utils.mjs";
+import { statsToRow } from "./langbench/msgs.mjs";
 import LaunchOptions from "./langbench/launchOptions.mjs";
-import fs, { readdirSync } from "node:fs";
-import path from "node:path";
+import fs from "node:fs";
 import Test from "./langbench/test.mjs";
 import Lang from "./langbench/lang.mjs";
 
@@ -43,62 +23,94 @@ setLog((head, ...tail) => {
 });
 
 log.prefixs = {
-  w: "[!]", //warn
-  i: "[+]", //individual
-  s: "[#]", //stage
-  c: "[$]", //command
-  a: "[~]", //attempt
-  d: "[@]", //debug
+  w: "[w]", //warn
+  i: "[i]", //individual
+  s: "[s]", //stage
+  c: "[c]", //command
+  a: "[a]", //attempt
+  d: "[d]", //debug
 };
+
+const benchEntries = [];
 
 async function main() {
   log("s", "init tests&langs");
   const tests = Test.getEnabled(
     JSON.parse(fs.readFileSync("./tests.json")),
-    launchOptions.t
+    launchOptions.t,
+    launchOptions.fm
   );
-  const langs = Lang.getEnabled(
+  const langs = await Lang.getEnabled(
     JSON.parse(fs.readFileSync("./langs.json")),
-    launchOptions.l
+    launchOptions.l,
+    launchOptions.fm
   );
+
+  if (langs.length == 0 || tests.length == 0) return;
+
+  log("d", "tests:", tests);
+  log("d", "langs:", langs);
 
   Test.attempts = launchOptions.ac;
 
-  //log("d", langs);
-  //log("d", tests);
   fs.rmSync("tmp", { recursive: true, force: true });
   fs.mkdirSync("tmp");
 
-  for (const test of tests) {
+  for (let i = 0; i < tests.length; ++i) {
+    const test = tests[i];
     log("s", `start test ${test.name}`);
-    for (const lang of langs) {
-      pwd.toTmp();
+    const srcName = test.src;
 
+    const lBenchEntries = [];
+    for (let j = 0; j < langs.length; ++j) {
+      const lang = langs[j];
       let buildStat;
-      console.log("||", test.src);
-      let src;
-      let cmdRun;
-      if (lang.build) {
-        buildStat = await lang.buildStat(test.src);
-        cmdRun = lang.run?.replace("<src>", test.src) ?? "./" + test.src;
-      } else
-        cmdRun = lang.run?.replace(
-          "<src>",
-          path.join("../", lang.findSrc(test.src))
-        );
+      if (lang.build) buildStat = await lang.buildStat(srcName);
+      let cmdRun = lang.getRunCmd(srcName);
 
-      console.log(lang.name, test.name, await test.bench(cmdRun));
+      log(
+        "s",
+        `[test ${i + 1}/${tests.length} | lang ${j + 1}/${langs.length}] "${
+          test.name
+        }" (${lang.name})`
+      );
+      const benchResult = await test.bench(
+        cmdRun,
+        launchOptions.la && lang.name
+      );
+
+      for (const input in benchResult) {
+        const lBenchEntry = benchResult[input];
+        lBenchEntry.lang = lang.name;
+        lBenchEntry.input = input;
+        if (buildStat) lBenchEntry.build = buildStat;
+        lBenchEntries.push(lBenchEntry);
+      }
       pwd.toTmp();
-      console.log(">>", test.src);
-      fs.rmSync(lang.out ?? test.src, { force: true });
-
-      //const exe = await lang.getSrc(test.src);
-      //log("p", "src:" + exe);
+      fs.rmSync(lang.out ?? srcName, { force: true });
     }
+    if (launchOptions.li) {
+      const inputs = [...new Set(lBenchEntries.map(v => v.input))];
+      inputs.forEach(input => {
+        console.log("");
+        msgs.table(
+          `${test.name}[${input}]`,
+          ["lang", "time", "mem", "cpu%", "build time", "build size"],
+          statsToRow(lBenchEntries.filter(e => e.input == input))
+        );
+      });
+    }
+    benchEntries.push(...lBenchEntries.map(e => ((e.test = test.name), e)));
   }
+  console.log("");
+  msgs.table(
+    `total`,
+    ["lang", "time", "mem", "cpu%", "build time", "build size"],
+    statsToRow(benchEntries)
+  );
 
+  pwd.toRoot();
   if (fs.existsSync("tmp")) fs.rmdirSync("tmp");
-  process.chdir("../");
 }
 try {
   main();
