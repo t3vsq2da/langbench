@@ -13,7 +13,10 @@ const msgs = {
     `The source file of language '${lang}' could not be identified. Specify the extension in the language configuration`,
   undefinedTest: name => `unrecognized test name '${name}'`,
   undefinedLang: name => `unrecognized lang name '${name}'`,
-  needReq: (lName, req) => `Language '${lName}' requires dependency '${req}'`,
+  needReq: (req, lName) =>
+    `${lName ? `language '${lName}' ` : ""}requires dependency '${req}'`,
+  sudoDmidecode: () =>
+    "enter the root password to get RAM information via dmidecode. Or disable the si option: '-si false'",
   incorrectOutput: (
     cmd,
     stdout,
@@ -43,7 +46,7 @@ cmd:'${cmd}' code:'${code}'
     },
     mem: m => {
       m = Number(m);
-      const prefixs = ["B", "KB", "MB", "GB"];
+      const prefixs = ["B", "KB", "MB", "GB", "TB"];
       let i = 0;
       while (m > 2048) {
         m /= 1024;

@@ -11,13 +11,16 @@
   },
   "--elixir onecore":{
     "folder":"elixir",
-    "buildSize":"wc -c < /tmp/Elixir.Main.beam",
+    "req":["elixir","elixirc"],
     "build":"elixirc --no-debug-info -o /tmp <src> ",
+    "//":"'out' is used ONLY for measuring the file size.",
+    "out":"Elixir.Main.beam",
     "run":"elixir --erl \"+S 1 +A 1 +sbt u +sub true -smp enable\" -pa /tmp -e \"Main.main()\" -- "
   },
   "--elixir":{
     "folder":"elixir",
     "multicore":true,
+    "req":["elixir","elixirc"],
     "build":"elixirc --no-debug-info <src>",
     "//":"'out' is used ONLY for measuring the file size.",
     "out":"Elixir.Main.beam",
@@ -25,40 +28,48 @@
   },
   "haskell":{
     "folder":"hs",
-    "ext":"hs",
-    "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>"
+    "req":["stack"],
+    "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
+    "ext":"hs"
   },
   "rust":{
     "folder":"rust",
+    "req":["rustc"],
     "build":"rustc -C opt-level=3 -C target-cpu=native -C lto=fat -C codegen-units=1 -C panic=abort <src> -o <out>"
   },
   "--python":{
     "folder":"py",
+    "req":["python"],
     "run":"python -OO -B -E -u <src>"
   },
   "--pypy3":{
     "folder":"py",
+    "req":["pypy3"],
     "run":"pypy3 -OO -B -E -u <src>"
   },
   "--perl":{
     "folder":"perl",
+    "req":["perl"],
     "run":"perl <src>"
   },
   "nodeJS":{
     "folder":"js",
+    "req":["node"],
     "run":"node --no-concurrent-sweeping --predictable --max-old-space-size=4096 <src>"
   },
   "--denoJS":{
     "folder":"js",
+    "req":["deno"],
     "build":"deno compile --unstable --quiet --allow-read --allow-write --output <out> <src>"
   },
   "--nim":{
     "folder":"nim",
-    "comment":"",
+    "req":["nim"],
     "build":"nim c -d:release --verbosity:0 --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src>"
   },
   "--go":{
     "folder":"go",
+    "req":["go"],
     "build":"go build -ldflags=\"-s -w\" -trimpath -o <out> <src>"
   }
 }

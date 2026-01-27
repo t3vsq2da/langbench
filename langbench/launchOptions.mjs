@@ -17,9 +17,10 @@ import {
   log,
   needLen,
   opposite,
+  exec,
 } from "./utils.mjs";
-
-const coreCount = () => (console.log("TODO CORE COUNT"), 4);
+import fs from "fs";
+import os from "os";
 
 class LaunchOptions {
   constructor(vargs) {
@@ -48,8 +49,59 @@ class LaunchOptions {
         else options[flag] = values;
       } else throw new LBError(msgs.noFlag());
 
+    options.sysInfo = LaunchOptions.sysInfo();
     return options;
   }
+
+  static sysInfo = async () => {
+    const cpu = () => {
+      const content = fs.readFileSync("/proc/cpuinfo", "utf8");
+      const lines = content.split("\n");
+
+      let logicalCount = 0;
+      let modelName = "";
+
+      for (const line of lines)
+        if (line.startsWith("processor")) logicalCount++;
+        else if (line.startsWith("model name") && !modelName)
+          modelName = line.split(":")[1].trim();
+
+      return {
+        model: modelName,
+        logicalCores: logicalCount,
+      };
+    };
+
+    const disks = async () => {
+      const { stdout } = await exec("lsblk", [
+        "-d",
+        "-o",
+        "NAME,MODEL,SERIAL,SIZE,TRAN",
+        "--json",
+      ]);
+      const devs = JSON.parse(stdout).blockdevices;
+      return devs
+        .filter(dev => {
+          if (dev.model == null || dev.name == null || dev.serial == null)
+            return 0;
+          else if (/^(loop|ram|zram|dm-|md|sr|fd)/.test(dev.name)) return 0;
+          else if (fs.readFileSync(`/sys/block/${dev.name}/removable`) == 1)
+            return 0;
+          else return 1;
+        })
+        .map(dev => dev.model);
+    };
+
+    const oss = () => {
+      return {
+        platform: os.platform(),
+        release: os.release(),
+        arch: os.arch(),
+      };
+    };
+
+    return { cpu: cpu(), disks: await disks(), os: oss() };
+  };
 
   static checks = {
     //log warnings
@@ -80,14 +132,12 @@ class LaunchOptions {
     ac: every(isType("number"), Number.isInteger, n => n > 0),
     //fast mode
     fm: isType("boolean"),
-    //sort by Time, maxMem averageMem buildSize buildTime
-    sb: words =>
-      isSet(words) &&
-      words.every(w => ["t", "mm", "am", "bs", "bt"].includes(w)),
     //min cpu %
     mcp: every(isType("number"), Number.isInteger, inRange(1, 100)),
     //max cores
-    mc: every(isType("number"), Number.isInteger, inRange(1, coreCount())),
+    mc: every(isType("number"), Number.isInteger, n => n >= 1),
+    //sys info
+    si: isType("boolean"),
   };
 
   static default = {
@@ -105,6 +155,7 @@ class LaunchOptions {
     sb: ["t", "am", "mm", "bs", "bt"],
     mcp: 95,
     mc: 3,
+    si: true,
   };
 }
 

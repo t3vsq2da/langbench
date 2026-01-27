@@ -65,7 +65,7 @@ export const isEmpty = v =>
 import { spawn } from "child_process";
 import fs from "fs";
 
-export const exec = (cmd, args, pidCb) => {
+export const exec = (cmd, args) => {
   return new Promise((resolve, reject) => {
     if (args == null) args = [];
     else if (typeof args === "string") args = [args];
@@ -75,7 +75,6 @@ export const exec = (cmd, args, pidCb) => {
     const child = spawn(cmd, args, {
       stdio: ["pipe", "pipe", "pipe"],
     });
-    pidCb?.(child.pid);
 
     let stdout = "";
     let stderr = "";
@@ -110,6 +109,7 @@ let _log = (...msg) => (console.log("BASELOG:", ...msg), msg[0]);
 export const log = (...a) => _log(...a);
 export const setLog = l => (_log = l);
 
+//taskset -c 0,1,2,3
 export const statCmd = async (cmd, args) => {
   if (args == null) args = [];
   else if (typeof args === "string") args = [args];
@@ -131,7 +131,11 @@ export const statCmd = async (cmd, args) => {
   const [utime, stime, mem, cpu] = splittedRes;
   return {
     stdout,
-    stat: { time: Number(utime) + Number(stime), mem, cpu },
+    stat: {
+      time: Number(utime) + Number(stime),
+      mem: Number(mem),
+      cpu: parseInt(cpu),
+    },
     code,
   };
 };

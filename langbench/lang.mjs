@@ -32,7 +32,7 @@ export default class Lang {
 
     const checkReq = async (name, req) => {
       if ((await exec("which", req)).code)
-        throw new LBError(msgs.needReq(name, req));
+        throw new LBError(msgs.needReq(req, name));
     };
 
     return await Promise.all(

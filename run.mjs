@@ -1,12 +1,17 @@
-import { pwd, msgs, isEmpty, setLog, log } from "./langbench/utils.mjs";
+import {
+  pwd,
+  exec,
+  LBError,
+  msgs,
+  isEmpty,
+  setLog,
+  log,
+} from "./langbench/utils.mjs";
 import { statsToRow } from "./langbench/msgs.mjs";
 import LaunchOptions from "./langbench/launchOptions.mjs";
 import fs from "node:fs";
 import Test from "./langbench/test.mjs";
 import Lang from "./langbench/lang.mjs";
-
-const tests = { t1: 1, t2: 2 };
-const langs = { l1: 1, l2: 2 };
 
 const launchOptions = new LaunchOptions(process.argv);
 
@@ -33,7 +38,31 @@ log.prefixs = {
 
 const benchEntries = [];
 
+import os from "os";
+
+const totalTimeLang = (lang, entries) => {
+  const filtred = benchEntries.filter(e => e.lang == lang);
+  const total = filtred[0];
+  filtred.slice(1)?.forEach?.(e => {
+    total.time += e.time;
+    total.mem += e.mem;
+    total.cpu += e.cpu;
+    if (total.build) {
+      total.build.time += e.build.time;
+      total.build.size += e.build.size;
+    }
+  });
+  total.cpu = total.cpu / filtred.length;
+  return total;
+};
+
 async function main() {
+  if ((await exec("ls", "/usr/bin/time")).code)
+    throw new LBError(msgs.needReq("/usr/bin/time"));
+
+  if (launchOptions.mc > (await launchOptions.sysInfo).cpu.logicalCores)
+    throw new LBError(msgs.validArgFail("mc", launchOptions.mc));
+
   log("s", "init tests&langs");
   const tests = Test.getEnabled(
     JSON.parse(fs.readFileSync("./tests.json")),
@@ -99,15 +128,28 @@ async function main() {
           statsToRow(lBenchEntries.filter(e => e.input == input))
         );
       });
+      console.log("");
+      msgs.table(
+        `${test.name}`,
+        ["lang", "time", "mem", "cpu%", "build time", "build size"],
+        statsToRow(lBenchEntries)
+      );
     }
     benchEntries.push(...lBenchEntries.map(e => ((e.test = test.name), e)));
   }
+  const totalEntries = [];
+  for (let { name } of langs) {
+    totalEntries.push(totalTimeLang(name, benchEntries));
+  }
+
   console.log("");
   msgs.table(
     `total`,
     ["lang", "time", "mem", "cpu%", "build time", "build size"],
-    statsToRow(benchEntries)
+    statsToRow(totalEntries)
   );
+
+  if (launchOptions.si) console.log(launchOptions.sysInfo);
 
   pwd.toRoot();
   if (fs.existsSync("tmp")) fs.rmdirSync("tmp");
