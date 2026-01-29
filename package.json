@@ -1,11 +1,8 @@
 {
   "name": "langbench",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "application for the benchmark of programming languages | programs",
   "main": "run.js",
-  "scripts": {
-    "start": "node start.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/t3vsq2da/langbench.git"

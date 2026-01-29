@@ -1,14 +1,4 @@
-import {
-  LBError,
-  excludeDisabled,
-  statCmd,
-  msgs,
-  log,
-  pwd,
-  exec,
-  splitCmd,
-  ALL,
-} from "./utils.mjs";
+import { LBError, excludeDisabled, msgs, ALL, Cmd } from "./utils.mjs";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -31,12 +21,14 @@ export default class Lang {
     }
 
     const checkReq = async (name, req) => {
-      if ((await exec("which", req)).code)
+      if ((await Cmd.exec("which", req)).code)
         throw new LBError(msgs.needReq(req, name));
     };
 
     return await Promise.all(
       entries.map(async ([name, data]) => {
+        if (data.folder == null)
+          throw new LBError(msgs.missedFieldLang(name, "folder"));
         if (data.req)
           if (data.req.length)
             for (let req of data.req) await checkReq(name, req);
@@ -47,8 +39,6 @@ export default class Lang {
   };
 
   findSrc = src => {
-    pwd.toRoot();
-
     let matches = fs.readdirSync(this.folder).filter(e => e.startsWith(src));
     if (matches.length === 0)
       throw new LBError(msgs.srcNoFound(this.name, src));
@@ -76,18 +66,15 @@ export default class Lang {
 
   buildStat = async testSrc => {
     const src = this.findSrc(testSrc);
-
+    testSrc = path.join("tmp", testSrc);
     if (this.build) {
-      pwd.toTmp();
-      const [cmd, ...args] = splitCmd(
-        this.build
-          .replace("<src>", path.join("../", src))
-          .replace("<out>", testSrc)
-      );
-
       const {
         stat: { time },
-      } = await statCmd(cmd, args);
+      } = await Cmd.stat(
+        ...Cmd.fromStr(
+          this.build.replaceAll("<src>", src).replaceAll("<out>", testSrc)
+        )
+      ); //cmd, args
       const size = fs.statSync(this.out ?? testSrc).size;
 
       return { time, size };

@@ -1,15 +1,14 @@
-import { stderr } from "node:process";
+import { fromStr } from "./cmd.mjs";
 import {
-  statCmd,
   excludeDisabled,
   msgs,
   log,
-  pwd,
   LBError,
-  splitCmd,
   ALL,
-  exec,
+  Cmd,
+  Entries,
 } from "./utils.mjs";
+import fs from "fs";
 
 export default class Test {
   static attempts;
@@ -32,17 +31,21 @@ export default class Test {
       else entries = entries.filter(([name]) => names.includes(name));
     }
 
-    return entries.map(([name, data]) => new Test(name, data));
+    return entries.map(([name, data]) => {
+      if (data.src == null)
+        throw new LBError(msgs.missedFieldTest(name, "src"));
+      return new Test(name, data);
+    });
   };
 
-  async bestStat(cmd, input, expectedOut, lName) {
-    if (input) cmd += " " + input;
-    cmd = splitCmd(cmd);
+  bestStat = async (cmd, input, expectedOut) => {
     let best;
 
     for (let i = 0; i < Test.attempts; ++i) {
-      pwd.toTmp();
-      const { stdout, stat, code } = await statCmd(cmd[0], cmd.slice(1));
+      const { stdout, stat, code } = await Cmd.stat(
+        ...fromStr(cmd + " " + input),
+        "tmp"
+      );
       log(
         "a",
         `${this.name}[${input}] attempt ${i + 1}/${Test.attempts} : ` +
@@ -59,25 +62,43 @@ export default class Test {
       if (best == null || Test.compareAttempts(stat, best) == -1) best = stat;
     }
     return best;
-  }
+  };
 
-  async bench(cmd, lName) {
+  bench = async cmd => {
     const stats = {};
 
     if (this.asserts && Object.keys(this.asserts).length) {
       for (const input in this.asserts) {
-        stats[input] = await this.bestStat(
-          cmd,
-          input,
-          this.asserts[input],
-          lName
-        );
+        stats[input] = await this.bestStat(cmd, input, this.asserts[input]);
       }
     } else {
-      stats[""] = await this.bestStat(cmd, null, null, lName);
+      stats[""] = await this.bestStat(cmd, null, null);
     }
     return stats;
-  }
-}
+  };
 
-export class TestMeasure {}
+  benchLangs = async (langs, testIndex, testLen) => {
+    const lBenchEntries = [];
+    const appName = this.src;
+    for (let j = 0; j < langs.length; ++j) {
+      const lang = langs[j];
+      let buildStat;
+      if (lang.build) buildStat = await lang.buildStat(appName);
+
+      let cmdRun = lang.getRunCmd(appName);
+      log(
+        "s",
+        `[test ${testIndex + 1}/${testLen} | lang ${j + 1}/${langs.length}] "${
+          this.name
+        }" (${lang.name})`
+      );
+      const benchResult = await this.bench(cmdRun);
+      lBenchEntries.push(
+        ...Entries.parseBecnhResult(benchResult, lang.name, buildStat)
+      );
+
+      fs.rmSync(lang.out ?? appName, { force: true });
+    }
+    return lBenchEntries;
+  };
+}

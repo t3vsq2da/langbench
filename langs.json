@@ -4,7 +4,7 @@
     "req":["g++"],
     "build":"g++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
-  "cpp clang":{
+  "--cpp clang":{
     "folder":"cpp",
     "req":["clang++"],
     "build":"clang++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
@@ -12,21 +12,20 @@
   "--elixir onecore":{
     "folder":"elixir",
     "req":["elixir","elixirc"],
-    "build":"elixirc --no-debug-info -o /tmp <src> ",
+    "build":"elixirc --no-debug-info <src> -o tmp",
     "//":"'out' is used ONLY for measuring the file size.",
-    "out":"Elixir.Main.beam",
-    "run":"elixir --erl \"+S 1 +A 1 +sbt u +sub true -smp enable\" -pa /tmp -e \"Main.main()\" -- "
+    "out":"./tmp/Elixir.Main.beam",
+    "run":"taskset -c 0 elixir --erl \"+S 1 +A 1 +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
   },
-  "--elixir":{
+  "elixir":{
     "folder":"elixir",
-    "multicore":true,
     "req":["elixir","elixirc"],
-    "build":"elixirc --no-debug-info <src>",
+    "build":"elixirc --no-debug-info <src> -o tmp",
     "//":"'out' is used ONLY for measuring the file size.",
-    "out":"Elixir.Main.beam",
-    "run":"elixir --erl \"+S $(nproc) +A 1 +sbt u +sub true -smp enable\" -e \"Main.main()\" -- "
+    "out":"./tmp/Elixir.Main.beam",
+    "run":"elixir --erl \"+S 4 +A 1 +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
   },
-  "haskell":{
+  "--haskell":{
     "folder":"hs",
     "req":["stack"],
     "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",

@@ -1,4 +1,6 @@
 import msgs from "./msgs.mjs";
+export * as Cmd from "./cmd.mjs";
+export * as Entries from "./entries.mjs";
 
 export const pipe =
   (...funcs) =>
@@ -62,35 +64,6 @@ export const isEmpty = v =>
   (typeof v === "string" && !v.length) ||
   (typeof v === "object" && !Object.keys(v).length);
 
-import { spawn } from "child_process";
-import fs from "fs";
-
-export const exec = (cmd, args) => {
-  return new Promise((resolve, reject) => {
-    if (args == null) args = [];
-    else if (typeof args === "string") args = [args];
-
-    log("c", "(", process.cwd(), ")", [cmd, ...args].join(" "));
-
-    const child = spawn(cmd, args, {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-
-    let stdout = "";
-    let stderr = "";
-
-    child.stdout.on("data", data => (stdout += data.toString()));
-
-    child.stderr.on("data", data => (stderr += data.toString()));
-
-    child.on("error", reject);
-
-    child.on("close", code =>
-      resolve({ stdout: stdout.trim(), stderr: stderr.trim(), code })
-    );
-  });
-};
-
 export const throwError = e => {
   throw e;
 };
@@ -110,79 +83,6 @@ export const log = (...a) => _log(...a);
 export const setLog = l => (_log = l);
 
 //taskset -c 0,1,2,3
-export const statCmd = async (cmd, args) => {
-  if (args == null) args = [];
-  else if (typeof args === "string") args = [args];
-
-  const cmdSplitted = splitCmd(
-    `/usr/bin/time -f "%U %S %M %P" ${cmd} ${args.join(" ")}`
-  );
-  cmd = cmdSplitted[0];
-  args = cmdSplitted.slice(1);
-
-  const { stdout, stderr, code } = await exec(cmd, args);
-
-  const splittedRes = stderr.replace(/^'|'$/, "").split(" ");
-  if (splittedRes.length != 4)
-    throw new LBError(
-      msgs.incorrectOutput(cmd + " " + args.join(" "), stdout, stderr, code)
-    );
-
-  const [utime, stime, mem, cpu] = splittedRes;
-  return {
-    stdout,
-    stat: {
-      time: Number(utime) + Number(stime),
-      mem: Number(mem),
-      cpu: parseInt(cpu),
-    },
-    code,
-  };
-};
-
-export const pwd = {
-  toTmp: () => !process.cwd().endsWith("/tmp") && process.chdir("tmp"),
-  toRoot: () => process.cwd().endsWith("/tmp") && process.chdir("../"),
-};
-
-export const splitCmd = str => {
-  const args = [];
-  let i = 0;
-  let current = "";
-  let inQuotes = false;
-  let quoteChar = null;
-
-  while (i < str.length) {
-    const char = str[i];
-
-    if (!inQuotes) {
-      if (char === " ") {
-        if (current !== "") {
-          args.push(current);
-          current = "";
-        }
-      } else if (char === '"' || char === "'") {
-        inQuotes = true;
-        quoteChar = char;
-      } else current += char;
-    } else {
-      if (char === quoteChar) {
-        inQuotes = false;
-        quoteChar = null;
-      } else if (char === "\\" && quoteChar === '"') {
-        const next = str[i + 1];
-        if (next === '"' || next === "\\" || next === "$") {
-          current += next;
-          i++;
-        } else current += char;
-      } else current += char;
-    }
-
-    i++;
-  }
-  if (current !== "") args.push(current);
-  return args;
-};
 
 export const excludeDisabled = (obj, fm) => {
   for (let key in obj) {

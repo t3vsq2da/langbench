@@ -13,6 +13,10 @@ const msgs = {
     `The source file of language '${lang}' could not be identified. Specify the extension in the language configuration`,
   undefinedTest: name => `unrecognized test name '${name}'`,
   undefinedLang: name => `unrecognized lang name '${name}'`,
+  missedFieldLang: (lName, field) =>
+    `missing field '${field}' in the programming language configuration '${lName}'`,
+  missedFieldTest: (tName, field) =>
+    `missing field '${field}' in test configuration '${tName}'`,
   needReq: (req, lName) =>
     `${lName ? `language '${lName}' ` : ""}requires dependency '${req}'`,
   sudoDmidecode: () =>
@@ -59,6 +63,11 @@ cmd:'${cmd}' code:'${code}'
         s.cpu
       }`,
   },
+  sysInfo: ({ cpu, disks, os }) => `cpu: '${cpu.model}' (${
+    cpu.logicalCores
+  } threads)
+discs: '${disks.join(" ")}'
+os: ${os.platform}(${os.release}) arch:${os.arch}`,
   table: (title, headers, rows) => {
     headers = headers.map(h => h.toString().trim());
     rows = rows.map(row => row.map(ceil => ceil.toString().trim()));
@@ -109,6 +118,16 @@ export const statsToRow = stats => {
     stat?.build?.size ? msgs.formatStat.mem(stat.build.size) : "-",
   ]);
   return rows;
+};
+
+const sortBenchEntries = (a, b) => a.time - b.time;
+
+export const printEntriesTable = (head, entries) => {
+  msgs.table(
+    head,
+    ["lang", "time", "mem", "cpu%", "build time", "build size"],
+    statsToRow(entries.sort(sortBenchEntries))
+  );
 };
 
 export default msgs;

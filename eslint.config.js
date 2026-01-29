@@ -14,7 +14,6 @@ export default defineConfig([
       "no-unused-vars": "error",
       "no-unused-expressions": "error",
       "no-unreachable": "error",
-      indent: ["error", 2],
     },
   },
 ]);

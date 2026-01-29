@@ -1,29 +1,27 @@
 import {
   pipe,
-  _,
   msgs,
   isSet,
   ALL,
-  partial,
   every,
   autoCast,
-  typeOf,
   isType,
-  inRange,
-  head,
   isEmpty,
   LBError,
   map,
-  log,
-  needLen,
   opposite,
-  exec,
+  Cmd,
 } from "./utils.mjs";
+
 import fs from "fs";
 import os from "os";
 
 class LaunchOptions {
   constructor(vargs) {
+    if (vargs.includes("--help") || vargs.includes("-help")) {
+      console.log(helpMsg);
+      return {};
+    }
     const options = { ...LaunchOptions.default };
     for (let i = 2; i < vargs.length; )
       if (vargs[i].startsWith("-")) {
@@ -48,9 +46,7 @@ class LaunchOptions {
           throw new LBError(msgs.validArgFail(flag, values));
         else options[flag] = values;
       } else throw new LBError(msgs.noFlag());
-
-    options.sysInfo = LaunchOptions.sysInfo();
-    return options;
+    return { ...this, ...options };
   }
 
   static sysInfo = async () => {
@@ -73,7 +69,7 @@ class LaunchOptions {
     };
 
     const disks = async () => {
-      const { stdout } = await exec("lsblk", [
+      const { stdout } = await Cmd.exec("lsblk", [
         "-d",
         "-o",
         "NAME,MODEL,SERIAL,SIZE,TRAN",
@@ -104,18 +100,19 @@ class LaunchOptions {
   };
 
   static checks = {
-    //log warnings
-    lw: isType("boolean"),
     //log stages
     ls: isType("boolean"),
     //log debug
+    //I deleted all the debug messages :)
     ld: isType("boolean"),
     //log cmds
     lc: isType("boolean"),
-    //attempts
+    //log attempts
     la: isType("boolean"),
     //log individual tests | выводит результаты каждого теста
-    li: isType("boolean"),
+    li: v => [0, 1, 2].includes(v),
+    //log hardware(with os)
+    lh: isType("boolean"),
     //tests
     t: pipe(
       map(v => v.toString().trim()),
@@ -126,37 +123,33 @@ class LaunchOptions {
       map(v => v.toString().trim()),
       every(isSet, pipe(isEmpty, opposite))
     ),
-    //dif
-    d: isType("boolean"),
     //attemps count
     ac: every(isType("number"), Number.isInteger, n => n > 0),
     //fast mode
     fm: isType("boolean"),
-    //min cpu %
-    mcp: every(isType("number"), Number.isInteger, inRange(1, 100)),
-    //max cores
-    mc: every(isType("number"), Number.isInteger, n => n >= 1),
-    //sys info
-    si: isType("boolean"),
+    //save result
+    sr: isType("string"),
+    //save json
+    sj: isType("boolean"),
   };
 
   static default = {
-    lw: true,
     ls: true,
+    ld: false,
     lc: false,
     la: false,
-    ld: false,
-    li: true,
+    li: 1,
+    lh: true,
     t: [ALL],
     l: [ALL],
     d: false,
     ac: 3,
     fm: false,
-    sb: ["t", "am", "mm", "bs", "bt"],
-    mcp: 95,
-    mc: 3,
-    si: true,
+    sr: false,
+    sj: true,
   };
 }
 
 export default LaunchOptions;
+
+const helpMsg = ``;
