@@ -1,73 +1,62 @@
 const msgs = {
-  validArgFail: (flag, values) =>
-    `setting '${flag}' was passed an argument(s) '${
-      Array.isArray(values) ? values.join(" ") : values
-    }' that failed validation.`,
-  noFlag: () => `a flag (option) must be specified before the values`,
-  undefinedFlag: flag => `unknown flag '${flag}'`,
-  incorrectType: (func, type, value) =>
-    `@incorrectType: func:'${func}'\n expected:'${type}'\n value:'${value}'\n recivedType:'${typeof value}'`,
-  srcNoFound: (lang, name) =>
-    `file ${name} for language '${lang}' was not found.`,
-  specifyExt: lang =>
-    `The source file of language '${lang}' could not be identified. Specify the extension in the language configuration`,
-  undefinedTest: name => `unrecognized test name '${name}'`,
-  undefinedLang: name => `unrecognized lang name '${name}'`,
-  missedFieldLang: (lName, field) =>
-    `missing field '${field}' in the programming language configuration '${lName}'`,
-  missedFieldTest: (tName, field) =>
-    `missing field '${field}' in test configuration '${tName}'`,
-  needReq: (req, lName) =>
-    `${lName ? `language '${lName}' ` : ""}requires dependency '${req}'`,
-  sudoDmidecode: () =>
-    "enter the root password to get RAM information via dmidecode. Or disable the si option: '-si false'",
-  incorrectOutput: (
-    cmd,
-    stdout,
-    stderr,
-    code
-  ) => `incorrect output when running the command
-cmd:'${cmd}' code:'${code}'
-${stdout != null ? `[stdout-start]\n${stdout}\n[stdout-start]` : ""}
-${stderr.trim() != null ? `[stderr-start]\n${stderr}\n[stderr-end]` : ""}
-`,
-  incorrectRes: (
-    testName,
-    cmd,
-    code,
-    expected,
-    stdout
-  ) => `incorrect result when performing test '${testName}'
-cmd:'${cmd}' code:'${code}'
-[expected-stdout-start]\n${expected}\n[expected-stdout-end]
-[stdout-start]\n${stdout}\n[stdout-start]`,
-  langNoRun: langName =>
-    `it is not possible to define a command to run in language '${langName}'`,
-  formatStat: {
-    time: t => {
-      t = Number(t);
-      return t > 100 ? (t / 60).toFixed(2) + "m" : t.toFixed(2) + "s";
-    },
-    mem: m => {
-      m = Number(m);
-      const prefixs = ["B", "KB", "MB", "GB", "TB"];
-      let i = 0;
-      while (m > 2048) {
-        m /= 1024;
-        ++i;
-      }
-      return Number.isInteger(m) ? m : m.toFixed(1) + prefixs[i];
-    },
-    stat: s =>
-      `t:${msgs.formatStat.time(s.time)} m:${msgs.formatStat.mem(s.mem)} cpu%:${
-        s.cpu
-      }`,
-  },
-  sysInfo: ({ cpu, disks, os }) => `cpu: '${cpu.model}' (${
-    cpu.logicalCores
-  } threads)
+  launchOptions: {
+    validArgFail: (flag, values) =>
+      `setting '${flag}' was passed an argument(s) '${
+        Array.isArray(values) ? values.join(" ") : values
+      }' that failed validation.`,
+    noFlag: () => `a flag (option) must be specified before the values`,
+    undefinedFlag: flag => `unknown flag '${flag}'`,
+    sysInfo: ({ cpu, disks, os }) => `\ncpu: '${cpu.model}' (${
+      cpu.logicalCores
+    } threads)
 discs: '${disks.join(" ")}'
 os: ${os.platform}(${os.release}) arch:${os.arch}`,
+  },
+  utils: {
+    incorrectType: (func, type, value) =>
+      `@incorrectType: func:'${func}'\n expected:'${type}'\n value:'${value}'\n recivedType:'${typeof value}'`,
+    incorrectOutput: (
+      cmd,
+      stdout,
+      stderr,
+      code
+    ) => `incorrect output when running the command
+cmd:'${cmd}' code:'${code}'\
+${stdout?.trim().length ? `\n[stdout-start]\n${stdout}\n[stdout-start]` : ""}\
+${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
+    incorrectRes: (
+      testName,
+      cmd,
+      code,
+      expected,
+      stdout,
+      stderr
+    ) => `incorrect result when performing test '${testName}'
+cmd:'${cmd}' code:'${code}'
+[expected-stdout-start]\n${expected}\n[expected-stdout-end]
+[stdout-start]\n${stdout}\n[stdout-start]\
+${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
+  },
+  langs: {
+    srcNoFound: (lang, name) =>
+      `file '${name}' for language '${lang}' was not found.`,
+    specifyExt: lang =>
+      `The source file of language '${lang}' could not be identified. Specify the extension in the language configuration`,
+    undefinedLang: name => `unrecognized lang name '${name}'`,
+    missedFieldLang: (lName, field) =>
+      `missing field '${field}' in the programming language configuration '${lName}'`,
+    needReq: (req, lName) =>
+      `${lName ? `language '${lName}' ` : ""}requires dependency '${req}'`,
+    langNoRun: langName =>
+      `it is not possible to define a command to run in language '${langName}'`,
+  },
+  tests: {
+    undefinedTest: name => `unrecognized test name '${name}'`,
+    missedFieldTest: (tName, field) =>
+      `missing field '${field}' in test configuration '${tName}'`,
+  },
+  benchEntires: e =>
+    `t:${format.time(e.time)} m:${format.mem(e.mem)} cpu%:${e.cpu}`,
   table: (title, headers, rows) => {
     headers = headers.map(h => h.toString().trim());
     rows = rows.map(row => row.map(ceil => ceil.toString().trim()));
@@ -99,35 +88,44 @@ os: ${os.platform}(${os.release}) arch:${os.arch}`,
     const formatRow = row => {
       return row.map((ceil, i) => pad(ceil, ceilWidths[i], " ")).join(" | ");
     };
-    //console.log("\n");
-    console.log(pad(title, rowWidth, "="));
-    console.log(formatRow(headers));
-    console.log("-".repeat(rowWidth));
-    rows.map(formatRow).forEach(c => console.log(c));
-    console.log("=".repeat(rowWidth));
+    const res = [];
+    res.push(pad(title, rowWidth, "="));
+    res.push(formatRow(headers));
+    res.push("-".repeat(rowWidth));
+    res.push(...rows.map(formatRow));
+    res.push("=".repeat(rowWidth));
+    return res.join("\n");
   },
 };
 
-export const statsToRow = stats => {
-  const rows = stats.map(stat => [
-    stat.lang,
-    msgs.formatStat.time(stat.time),
-    msgs.formatStat.mem(stat.mem),
-    stat.cpu,
-    stat?.build?.time ? msgs.formatStat.time(stat.build.time) : "-",
-    stat?.build?.size ? msgs.formatStat.mem(stat.build.size) : "-",
-  ]);
-  return rows;
-};
-
-const sortBenchEntries = (a, b) => a.time - b.time;
-
-export const printEntriesTable = (head, entries) => {
-  msgs.table(
-    head,
-    ["lang", "time", "mem", "cpu%", "build time", "build size"],
-    statsToRow(entries.sort(sortBenchEntries))
-  );
+export const format = {
+  time: t => {
+    //console.log("t", t);
+    t = Number(t);
+    return t > 100 ? (t / 60).toFixed(2) + "m" : t.toFixed(2) + "s";
+  },
+  mem: m => {
+    m = Number(m);
+    const prefixs = ["B", "KB", "MB", "GB", "TB"];
+    let i = 0;
+    while (m > 2048) {
+      m /= 1024;
+      ++i;
+    }
+    return Number.isInteger(m) ? m : m.toFixed(1) + prefixs[i];
+  },
+  benchEntires: entries => {
+    //console.log("e", entries);
+    const rows = entries.map(stat => [
+      stat.lang,
+      format.time(stat.time),
+      format.mem(stat.mem),
+      stat.cpu.toFixed(1),
+      stat?.build?.time ? format.time(stat.build.time) : "-",
+      stat?.build?.size ? format.mem(stat.build.size) : "-",
+    ]);
+    return rows;
+  },
 };
 
 export default msgs;

@@ -27,7 +27,7 @@ class LaunchOptions {
       if (vargs[i].startsWith("-")) {
         const flag = vargs[i].slice(1);
         if (!(flag in LaunchOptions.checks) || !flag.length)
-          throw new LBError(msgs.undefinedFlag(flag));
+          throw new LBError(msgs.launchOptions.undefinedFlag(flag));
 
         let values = [];
         while (vargs[++i] != null && !vargs[i].startsWith("-"))
@@ -40,12 +40,12 @@ class LaunchOptions {
           values.length == 1
         )
           values = autoCast(values[0] ?? true);
-        else throw new LBError(msgs.validArgFail(flag, values));
+        else throw new LBError(msgs.launchOptions.validArgFail(flag, values));
 
         if (!LaunchOptions.checks[flag](values))
-          throw new LBError(msgs.validArgFail(flag, values));
+          throw new LBError(msgs.launchOptions.validArgFail(flag, values));
         else options[flag] = values;
-      } else throw new LBError(msgs.noFlag());
+      } else throw new LBError(msgs.launchOptions.noFlag());
     return { ...this, ...options };
   }
 
@@ -127,10 +127,10 @@ class LaunchOptions {
     ac: every(isType("number"), Number.isInteger, n => n > 0),
     //fast mode
     fm: isType("boolean"),
-    //save result
-    sr: isType("string"),
-    //save json
-    sj: isType("boolean"),
+    //save result json
+    srj: isType("boolean"),
+    //save result table
+    srt: isType("boolean"),
   };
 
   static default = {
@@ -145,8 +145,8 @@ class LaunchOptions {
     d: false,
     ac: 3,
     fm: false,
-    sr: false,
-    sj: true,
+    srj: false,
+    srt: true,
   };
 }
 

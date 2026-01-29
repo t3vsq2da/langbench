@@ -1,6 +1,6 @@
 import msgs from "./msgs.mjs";
 export * as Cmd from "./cmd.mjs";
-export * as Entries from "./entries.mjs";
+export * as Entries from "./benchEntries.mjs";
 
 export const pipe =
   (...funcs) =>
@@ -71,7 +71,9 @@ export const throwError = e => {
 export const opposite = v =>
   typeof v === "boolean"
     ? !v
-    : throwError(new LBError(msgs.incorrectType("opposite", "boolean", v)));
+    : throwError(
+        new LBError(msgs.utils.incorrectType("opposite", "boolean", v))
+      );
 
 export const map =
   (...funcs) =>

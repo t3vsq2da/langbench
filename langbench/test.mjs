@@ -27,13 +27,13 @@ export default class Test {
     if (names[0] !== ALL) {
       const undefinedTest = names.find(tName => !(tName in rawTests));
       if (undefinedTest != null)
-        throw new LBError(msgs.undefinedTest(undefinedTest));
+        throw new LBError(msgs.tests.undefinedTest(undefinedTest));
       else entries = entries.filter(([name]) => names.includes(name));
     }
 
     return entries.map(([name, data]) => {
       if (data.src == null)
-        throw new LBError(msgs.missedFieldTest(name, "src"));
+        throw new LBError(msgs.tests.missedFieldTest(name, "src"));
       return new Test(name, data);
     });
   };
@@ -42,21 +42,28 @@ export default class Test {
     let best;
 
     for (let i = 0; i < Test.attempts; ++i) {
-      const { stdout, stat, code } = await Cmd.stat(
+      const { stdout, stat, code, stderr } = await Cmd.stat(
         ...fromStr(cmd + " " + input),
         "tmp"
       );
       log(
         "a",
         `${this.name}[${input}] attempt ${i + 1}/${Test.attempts} : ` +
-          msgs.formatStat.stat(stat)
+          msgs.benchEntires(stat)
       );
       if (
         expectedOut != null &&
         stdout.toString().trim() != expectedOut.toString().trim()
       )
         throw new LBError(
-          msgs.incorrectRes(this.name, cmd.join(" "), code, expectedOut, stdout)
+          msgs.utils.incorrectRes(
+            this.name,
+            cmd,
+            code,
+            expectedOut,
+            stdout,
+            stderr
+          )
         );
 
       if (best == null || Test.compareAttempts(stat, best) == -1) best = stat;

@@ -17,7 +17,7 @@
     "out":"./tmp/Elixir.Main.beam",
     "run":"taskset -c 0 elixir --erl \"+S 1 +A 1 +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
   },
-  "elixir":{
+  "--elixir":{
     "folder":"elixir",
     "req":["elixir","elixirc"],
     "build":"elixirc --no-debug-info <src> -o tmp",

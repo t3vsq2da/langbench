@@ -93,15 +93,25 @@ export const stat = async (cmd, args, pwd) => {
 
   const { stdout, stderr, code } = await _exec(cmd, args, pwd);
 
+  const stderrLines = stderr.split("\n");
+  stderrLines.pop();
+
   const splittedRes = stderr.replace(/^'|'$/, "").split(" ");
   if (splittedRes.length != 4)
     throw new LBError(
-      msgs.incorrectOutput(cmd + " " + args.join(" "), stdout, stderr, code)
+      msgs.utils.incorrectOutput(
+        cmd + " " + args.join(" "),
+        stdout,
+        stderrLines.join("\n"),
+        code
+      )
     );
 
   const [utime, stime, mem, cpu] = splittedRes;
+
   return {
     stdout,
+    stderr: stderrLines.join("\n"),
     stat: {
       time: Number(utime) + Number(stime),
       mem: Number(mem),

@@ -36,13 +36,21 @@ log.prefixs = {
   d: "[d]", //debug
 };
 
+//const jsonFileOut =
+let tableFileText = "";
+const tableFileAppned = launchOptions.srt
+  ? txt => (tableFileText += (txt != null ? txt : "") + "\n")
+  : null;
+let jsonFileObj = launchOptions.srt ? { total: null, tests: {} } : null;
+
 const benchEntries = [];
 
 async function main() {
   if (isEmpty(launchOptions)) return;
   launchOptions.sysInfo = await LaunchOptions.sysInfo();
+
   if ((await Cmd.exec("ls", "/usr/bin/time")).code)
-    throw new LBError(msgs.needReq("/usr/bin/time"));
+    throw new LBError(msgs.langs.needReq("/usr/bin/time"));
 
   log("s", "init tests&langs");
   const tests = Test.getEnabled(
@@ -61,41 +69,63 @@ async function main() {
   log("d", "tests:", tests);
   log("d", "langs:", langs);
 
+  const langNames = langs.map(l => l.name);
+
   Test.attempts = launchOptions.ac;
+  Entries.outSetSetting(launchOptions.li, tableFileAppned, jsonFileObj);
 
   fs.rmSync("tmp", { recursive: true, force: true });
   fs.mkdirSync("tmp");
 
+  //const jsonFileOut = launchOptions.srj ? (txt)=>;
+  //const tableFileOut = ;
   for (let i = 0; i < tests.length; ++i) {
     const test = tests[i];
     log("s", `start test ${test.name}`);
     const lBenchEntries = await test.benchLangs(langs, i, tests.length);
 
-    if (launchOptions.li)
-      Entries.viewTest(
-        lBenchEntries,
-        test.name,
-        langs.map(v => v.name),
-        launchOptions.li == 2
-      );
+    Entries.outEntriesTest(
+      lBenchEntries,
+      test.name,
+      langNames,
+      launchOptions.li == 2
+    );
+
+    if (launchOptions.li) {
+      //if (launchOptions.2srt) Entries.viewTest(...viewArgs, tableFileAppned);
+      /* if (launchOptions.srj){
+        if(jsonFileContent['test'])
+          jsonFileContent['test'][]= */
+    }
+
     benchEntries.push(...lBenchEntries.map(e => ((e.test = test.name), e)));
   }
-  log("");
-  Entries.viewTotal(
-    langs.map(v => v.name),
-    benchEntries
-  );
+  Entries.outEntriesTotal(langNames, benchEntries);
 
   if (launchOptions.lh) {
-    log("");
-    log(msgs.sysInfo(launchOptions.sysInfo));
+    log(msgs.launchOptions.sysInfo(launchOptions.sysInfo));
+    if (launchOptions.srt)
+      tableFileAppned(msgs.launchOptions.sysInfo(launchOptions.sysInfo));
   }
 
   if (fs.existsSync("tmp")) fs.rmSync("tmp", { force: true, recursive: true });
+
+  if (launchOptions.srt)
+    fs.writeFileSync("lang-bench-result.txt", tableFileText);
+
+  if (launchOptions.srj)
+    fs.writeFileSync("lang-bench-result.json", JSON.stringify(jsonFileObj));
 }
 
-try {
-  main();
-} catch (err) {
-  console.error(err);
-}
+const mainWrapper = async () => {
+  try {
+    await main();
+  } catch (err) {
+    if (err instanceof LBError) {
+      console.error("\nLANG BENCH ERROR!");
+      console.error(err.message);
+    } else console.error(err);
+  }
+};
+
+mainWrapper();

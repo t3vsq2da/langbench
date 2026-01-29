@@ -16,19 +16,19 @@ export default class Lang {
     if (names[0] !== ALL) {
       const undefinedLang = names.find(tName => !(tName in rawLangs));
       if (undefinedLang != null)
-        throw new LBError(msgs.undefinedLang(undefinedLang));
+        throw new LBError(msgs.langs.undefinedLang(undefinedLang));
       else entries = entries.filter(([name]) => names.includes(name));
     }
 
     const checkReq = async (name, req) => {
       if ((await Cmd.exec("which", req)).code)
-        throw new LBError(msgs.needReq(req, name));
+        throw new LBError(msgs.langs.needReq(req, name));
     };
 
     return await Promise.all(
       entries.map(async ([name, data]) => {
         if (data.folder == null)
-          throw new LBError(msgs.missedFieldLang(name, "folder"));
+          throw new LBError(msgs.langs.missedFieldLang(name, "folder"));
         if (data.req)
           if (data.req.length)
             for (let req of data.req) await checkReq(name, req);
@@ -39,17 +39,20 @@ export default class Lang {
   };
 
   findSrc = src => {
+    if (!fs.existsSync(this.folder))
+      throw new LBError(msgs.langs.srcNoFound(this.name, src));
+
     let matches = fs.readdirSync(this.folder).filter(e => e.startsWith(src));
     if (matches.length === 0)
-      throw new LBError(msgs.srcNoFound(this.name, src));
+      throw new LBError(msgs.langs.srcNoFound(this.name, src));
     else if (this.ext != null) {
       const fullName = src + "." + this.ext;
 
       if (matches.find(f => f === fullName) != null)
         return path.join(this.folder, fullName);
-      else throw new LBError(msgs.srcNoFound(this.name, fullName));
+      else throw new LBError(msgs.langs.srcNoFound(this.name, fullName));
     } else if (matches.length === 1) return path.join(this.folder, matches[0]);
-    else throw new LBError(msgs.specifyExt(this.name));
+    else throw new LBError(msgs.langs.specifyExt(this.name));
   };
 
   //relative tmp folder
@@ -61,7 +64,7 @@ export default class Lang {
       );
     else if (this.build)
       return this.run?.replace("<src>", testSrc) ?? "./" + testSrc;
-    else throw new LBError(msgs.langNoRun(this.name));
+    else throw new LBError(msgs.langs.langNoRun(this.name));
   };
 
   buildStat = async testSrc => {
