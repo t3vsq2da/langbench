@@ -99,7 +99,6 @@ os: ${os.platform}(${os.release}) arch:${os.arch}`,
     const formatRow = row => {
       return row.map((ceil, i) => pad(ceil, ceilWidths[i], " ")).join(" | ");
     };
-    //console.log("\n");
     console.log(pad(title, rowWidth, "="));
     console.log(formatRow(headers));
     console.log("-".repeat(rowWidth));

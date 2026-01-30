@@ -1,5 +1,5 @@
 {
-  "cpp gcc":{
+  "--cpp gcc":{
     "folder":"cpp",
     "req":["g++"],
     "build":"g++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
@@ -9,21 +9,13 @@
     "req":["clang++"],
     "build":"clang++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
-  "--elixir onecore":{
+  "elixir":{
     "folder":"elixir",
     "req":["elixir","elixirc"],
     "build":"elixirc --no-debug-info <src> -o tmp",
     "//":"'out' is used ONLY for measuring the file size.",
     "out":"./tmp/Elixir.Main.beam",
-    "run":"taskset -c 0 elixir --erl \"+S 1 +A 1 +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
-  },
-  "--elixir":{
-    "folder":"elixir",
-    "req":["elixir","elixirc"],
-    "build":"elixirc --no-debug-info <src> -o tmp",
-    "//":"'out' is used ONLY for measuring the file size.",
-    "out":"./tmp/Elixir.Main.beam",
-    "run":"elixir --erl \"+S 4 +A 1 +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
+    "run":"elixir --erl \"+S <threads-count> +A <threads-count> +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
   },
   "--haskell":{
     "folder":"hs",
@@ -31,7 +23,7 @@
     "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
     "ext":"hs"
   },
-  "rust":{
+  "--rust":{
     "folder":"rust",
     "req":["rustc"],
     "build":"rustc -C opt-level=3 -C target-cpu=native -C lto=fat -C codegen-units=1 -C panic=abort <src> -o <out>"

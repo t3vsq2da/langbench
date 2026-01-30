@@ -84,8 +84,6 @@ let _log = (...msg) => (console.log("BASELOG:", ...msg), msg[0]);
 export const log = (...a) => _log(...a);
 export const setLog = l => (_log = l);
 
-//taskset -c 0,1,2,3
-
 export const excludeDisabled = (obj, fm) => {
   for (let key in obj) {
     if (key.startsWith("--")) {
@@ -101,7 +99,7 @@ export const excludeDisabled = (obj, fm) => {
         key = key.slice(2);
       }
 
-    if (isType("object")(obj[key])) obj[key] = excludeDisabled(obj[key]);
+    if (isType("object")(obj[key])) obj[key] = excludeDisabled(obj[key], fm);
   }
   return obj;
 };

@@ -58,12 +58,12 @@ export default class Lang {
   //relative tmp folder
   getRunCmd = testSrc => {
     if (this.run)
-      return this.run?.replace(
+      return this.run?.replaceAll(
         "<src>",
         path.join("../", this.findSrc(testSrc))
       );
     else if (this.build)
-      return this.run?.replace("<src>", testSrc) ?? "./" + testSrc;
+      return this.run?.replaceAll("<src>", testSrc) ?? "./" + testSrc;
     else throw new LBError(msgs.langs.langNoRun(this.name));
   };
 

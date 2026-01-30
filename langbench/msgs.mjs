@@ -100,7 +100,6 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
 
 export const format = {
   time: t => {
-    //console.log("t", t);
     t = Number(t);
     return t > 100 ? (t / 60).toFixed(2) + "m" : t.toFixed(2) + "s";
   },
@@ -115,7 +114,6 @@ export const format = {
     return Number.isInteger(m) ? m : m.toFixed(1) + prefixs[i];
   },
   benchEntires: entries => {
-    //console.log("e", entries);
     const rows = entries.map(stat => [
       stat.lang,
       format.time(stat.time),

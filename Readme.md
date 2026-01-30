@@ -1,4 +1,4 @@
-# 🚀 LangBench — Cross-Platform Programming Language Benchmarking Tool
+# LangBench — Cross-Platform Programming Language Benchmarking Tool
 
 **LangBench** is a utility for comparing the performance of programs written in different programming languages.  
 It automatically runs benchmarks, measures execution time, memory usage, and other system metrics, then outputs summarized results.
@@ -25,13 +25,22 @@ Run the benchmark:
 | `-l`       | `langs`            | Space-separated list of languages      | Limits execution to the specified languages. Example: `-l rust go elixir` |
 | `-ac`      | `attempts-count`   | Integer ≥ 1                            | Number of repeated runs for each test. The final result uses the best (least resource-intensive) attempt. |
 | `-fm`      | `fast-mode`        | `true` / `false`                                   | Skips extended tests (those prefixed with `++`). Speeds up execution at the cost of reduced detail. |
+| `-mt`         | `max-threads`    | cpu log cores > Integers ≥ 1 | Sets the number of threads to perform multithreaded tests |
 | `-ls`      | `log-stage`        | `true` / `false`                       | Whether to log high-level progress stages (e.g., “Running test…”, “Analyzing results…”). |
 | `-lc`      | `log-commands`     | `true` / `false`                       | Log all executed system commands. |
 | `-la`      | `log-attempts`     | `true` / `false`                       | Show detailed output for each individual measurement attempt. |
 | `-li`      | `log-individual`   | `0`, `1`, `2`                          | Per-test logging verbosity:<br>• `0` — only overall summary<br>• `1` — results for each individual test<br>• `2` — more detailed information for each test |
 | `-lh`      | `log-hardware`     | `true` / `false`                       | Print hardware and OS information before testing. |
+| -srt | save-result-table | true / false | Saves test results to bench-result.txt in the current directory. The file content exactly matches the tabular output shown in the console. |
+| -srj | save-result-json | true / false | Saves test results to bench-result.json in the current directory. The file contains raw JSON data, which differs from the console output. |
 
 ## Usage Examples
+
+### It is recommended to run before the test prepare.sh
+```bash
+./prepare.sh
+```
+This script will configure the system so that the measurements are more accurate and less random.
 
 ### Run only the `fib` test for C++ (compiled with Clang) and Rust, 3 attempts, with stage logging:
 ```bash
@@ -44,6 +53,8 @@ Run the benchmark:
 ```bash
 ./bench.mjs -fm -ls false -li 0 -lh false
 ```
+
+
 
 ### `langs.json` — Language Configuration
 
@@ -70,8 +81,9 @@ Each test is defined as a separate key and includes:
   - Keys are command-line arguments passed to the program.  
   - Values are the **exact expected output** (including newlines).  
   - If a value is `null`, output validation is **skipped** for that run (only exit code or performance is checked).
+- **`multiThreads`** *(optional)* — if the value is `true', programs can be executed in multiple threads (via `taskset -c`)
 
-### Special Name Prefixes
+## Special Name Prefixes
 
 - Any test or language name starting with **`--`** is **always excluded** from all runs (useful for temporarily disabling items).  
 - Any name starting with **`++`** is **excluded in fast mode** (`-fm`) but included in full benchmark runs.

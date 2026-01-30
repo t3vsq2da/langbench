@@ -6,6 +6,7 @@ export const parseBecnhResult = (benchResult, langName, buildStat) => {
     const lBenchEntry = benchResult[input];
     lBenchEntry.lang = langName;
     lBenchEntry.input = input;
+    //There is a build in each of the benchEntry - therefore, as a result, the compilation time will be n times longer, where n is the number of inputs
     if (buildStat) lBenchEntry.build = buildStat;
     entries.push(lBenchEntry);
   }
@@ -23,17 +24,13 @@ export const outEntriesTest = (
   langsNames,
   forEachInputs
 ) => {
-  /* console.log("e:");
-  console.log(entries); */
   viewTest(entries, testName, langsNames, forEachInputs);
   if (outSetting.srtFn)
     viewTest(entries, testName, langsNames, forEachInputs, outSetting.srtFn);
   if (outSetting.srjObj) {
-    //console.log(outSetting.srjObj.tests[testName]);
     if (outSetting.srjObj.tests[testName])
       outSetting.srjObj.tests[testName].push(...entries);
     else outSetting.srjObj.tests[testName] = entries;
-    //console.log("after", outSetting.srjObj.tests[testName]);
   }
 };
 
@@ -78,13 +75,19 @@ const groupByLang = (langsNames, entries) => {
 };
 
 const totalStatLang = (lang, entries) => {
-  const filtred = entries.filter(e => e.lang == lang);
+  const filtred = structuredClone(entries).filter(e => e.lang == lang);
   const total = filtred[0];
+
   filtred.slice(1)?.forEach?.(e => {
     total.time += e.time;
     total.mem += e.mem;
     total.cpu += e.cpu;
+    if (total.build) {
+      total.build.time += e.build.time;
+      total.build.size += e.build.size;
+    }
   });
   total.cpu = total.cpu / filtred.length;
+
   return total;
 };

@@ -103,7 +103,7 @@ class LaunchOptions {
     //log stages
     ls: isType("boolean"),
     //log debug
-    //I deleted all the debug messages :)
+    //i deleted most of the debug messages. :)
     ld: isType("boolean"),
     //log cmds
     lc: isType("boolean"),
@@ -131,6 +131,8 @@ class LaunchOptions {
     srj: isType("boolean"),
     //save result table
     srt: isType("boolean"),
+    //max count threads for multithrteads tests
+    mt: every(isType("number"), Number.isInteger, n => n >= 1),
   };
 
   static default = {
@@ -143,10 +145,11 @@ class LaunchOptions {
     t: [ALL],
     l: [ALL],
     d: false,
-    ac: 3,
+    ac: 5,
     fm: false,
     srj: false,
     srt: true,
+    mt: null,
   };
 }
 
