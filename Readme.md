@@ -3,6 +3,8 @@
 **LangBench** is a utility for comparing the performance of programs written in different programming languages.  
 It automatically runs benchmarks, measures execution time, memory usage, and other system metrics, then outputs summarized results.
 
+[English](README.md) | [Русский](README.ru.md)
+
 ## Running
 
 Make the script executable (if not already):
@@ -31,8 +33,8 @@ Run the benchmark:
 | `-la`      | `log-attempts`     | `true` / `false`                       | Show detailed output for each individual measurement attempt. |
 | `-li`      | `log-individual`   | `0`, `1`, `2`                          | Per-test logging verbosity:<br>• `0` — only overall summary<br>• `1` — results for each individual test<br>• `2` — more detailed information for each test |
 | `-lh`      | `log-hardware`     | `true` / `false`                       | Print hardware and OS information before testing. |
-| -srt | save-result-table | true / false | Saves test results to bench-result.txt in the current directory. The file content exactly matches the tabular output shown in the console. |
-| -srj | save-result-json | true / false | Saves test results to bench-result.json in the current directory. The file contains raw JSON data, which differs from the console output. |
+| `-srt` | save-result-table | true / false | Saves test results to bench-result.txt in the current directory. The file content exactly matches the tabular output shown in the console. |
+| `-srj` | save-result-json | true / false | Saves test results to bench-result.json in the current directory. The file contains raw JSON data, which differs from the console output. |
 
 ## Usage Examples
 
@@ -67,7 +69,7 @@ Each programming language is defined as a separate key and may include the follo
   - `<out>` → replaced with the name of the output executable.  
 - **`run`** *(optional)* — command to run the program. May include `<src>` (useful for interpreted languages like Python or Elixir).  
 - **`ext`** *(optional)* — source file extension (e.g., `"cpp"`, `"rs"`, `"exs"`).  
-- **`out`** *(optional)* — name of the output file, **used only for measuring binary size**. Required when the output filename cannot be determined automatically (e.g., Elixir scripts don’t produce a single executable).
+- **`out`** *(optional)* — name of the output file, **used only for measuring binary size**. Required when the output filename cannot be determined automatically (e.g., Elixir scripts don’t produce a single executable). It can contain `<out>`, which will be replaced by the name of the source code (needed for Java)
 
 > If `build` is specified but `run` is omitted, the compiled program will be executed directly as an executable (`./<out>`).  
 > For interpreted languages (e.g., Python), only `run` is needed.

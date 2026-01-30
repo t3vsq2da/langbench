@@ -78,7 +78,9 @@ export default class Lang {
           this.build.replaceAll("<src>", src).replaceAll("<out>", testSrc)
         )
       ); //cmd, args
-      const size = fs.statSync(this.out ?? testSrc).size;
+      const size = fs.statSync(
+        this.out?.replace("<out>", testSrc) ?? testSrc
+      ).size;
 
       return { time, size };
     }

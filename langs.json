@@ -1,13 +1,20 @@
 {
-  "--cpp gcc":{
+  "cpp gcc":{
     "folder":"cpp",
     "req":["g++"],
     "build":"g++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
-  "--cpp clang":{
+  "cpp clang":{
     "folder":"cpp",
     "req":["clang++"],
     "build":"clang++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
+  },
+  "java openJDK":{
+    "folder":"java",
+    "req":["javac","java"],
+    "build":"javac -d ./tmp ./<src>",
+    "out":"<out>.class",
+    "run":"java <src>"
   },
   "elixir":{
     "folder":"elixir",
@@ -17,48 +24,48 @@
     "out":"./tmp/Elixir.Main.beam",
     "run":"elixir --erl \"+S <threads-count> +A <threads-count> +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
   },
-  "--haskell":{
+  "haskell":{
     "folder":"hs",
     "req":["stack"],
     "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
     "ext":"hs"
   },
-  "--rust":{
+  "rust":{
     "folder":"rust",
     "req":["rustc"],
     "build":"rustc -C opt-level=3 -C target-cpu=native -C lto=fat -C codegen-units=1 -C panic=abort <src> -o <out>"
   },
-  "--python":{
+  "python":{
     "folder":"py",
     "req":["python"],
     "run":"python -OO -B -E -u <src>"
   },
-  "--pypy3":{
+  "pypy3":{
     "folder":"py",
     "req":["pypy3"],
     "run":"pypy3 -OO -B -E -u <src>"
   },
-  "--perl":{
+  "perl":{
     "folder":"perl",
     "req":["perl"],
     "run":"perl <src>"
   },
-  "nodeJS":{
+  "nodejs":{
     "folder":"js",
     "req":["node"],
     "run":"node --no-concurrent-sweeping --predictable --max-old-space-size=4096 <src>"
   },
-  "--denoJS":{
+  "denojs":{
     "folder":"js",
     "req":["deno"],
     "build":"deno compile --unstable --quiet --allow-read --allow-write --output <out> <src>"
   },
-  "--nim":{
+  "nim":{
     "folder":"nim",
     "req":["nim"],
     "build":"nim c -d:release --verbosity:0 --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src>"
   },
-  "--go":{
+  "go":{
     "folder":"go",
     "req":["go"],
     "build":"go build -ldflags=\"-s -w\" -trimpath -o <out> <src>"

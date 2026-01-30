@@ -113,8 +113,6 @@ async function main() {
     if (launchOptions.srj) jsonFileObj.system = launchOptions.sysInfo;
   }
 
-  if (fs.existsSync("tmp")) fs.rmSync("tmp", { force: true, recursive: true });
-
   if (launchOptions.srt) fs.writeFileSync("bench-result.txt", tableFileText);
 
   if (launchOptions.srj)
@@ -135,6 +133,9 @@ const mainWrapper = async () => {
       console.error("\nLANG BENCH ERROR!");
       console.error(err.message);
     } else console.error(err);
+  } finally {
+    if (fs.existsSync("tmp"))
+      fs.rmSync("tmp", { force: true, recursive: true });
   }
 };
 

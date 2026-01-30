@@ -1,4 +1,4 @@
-import { argv } from "process";
+import { argv } from "node:process";
 
 const n = Number(argv[2]);
 let inside = 0;
