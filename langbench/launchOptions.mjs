@@ -111,8 +111,8 @@ class LaunchOptions {
     la: isType("boolean"),
     //log individual tests | выводит результаты каждого теста
     li: v => [0, 1, 2].includes(v),
-    //log hardware(with os)
-    lh: isType("boolean"),
+    //log options + hardware(with os)
+    lo: isType("boolean"),
     //tests
     t: pipe(
       map(v => v.toString().trim()),
@@ -141,7 +141,7 @@ class LaunchOptions {
     lc: false,
     la: false,
     li: 1,
-    lh: true,
+    lo: true,
     t: [ALL],
     l: [ALL],
     d: false,

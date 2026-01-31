@@ -116,7 +116,12 @@ export default class Test {
       );
       const benchResult = await this.bench(cmdRun, lang.name);
       lBenchEntries.push(
-        ...Entries.parseBecnhResult(benchResult, lang.name, buildStat)
+        ...Entries.parseBecnhResult(
+          benchResult,
+          this.name,
+          lang.name,
+          buildStat
+        )
       );
 
       fs.rmSync(lang.out ?? appName, { force: true });

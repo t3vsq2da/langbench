@@ -41,7 +41,7 @@ let tableFileText = "";
 const tableFileAppned = launchOptions.srt
   ? txt => (tableFileText += (txt != null ? txt : "") + "\n")
   : null;
-let jsonFileObj = launchOptions.srt ? { total: null, tests: {} } : null;
+let jsonFileObj = launchOptions.srt ? { total: null, entries: [] } : null;
 
 const benchEntries = [];
 
@@ -62,6 +62,14 @@ async function main() {
     launchOptions.mt = Math.min(4, Math.max(logCores - 1, 1));
   else if (launchOptions.mt != null && launchOptions.mt >= logCores)
     throw new LBError(msgs.launchOptions.validArgFail("mt", launchOptions.mt));
+
+  log(
+    "o",
+    Object.entries(launchOptions)
+      .map(([k, v]) => k + ":" + v)
+      .join("\n")
+  );
+
   log("s", "init tests&langs");
   const tests = Test.getEnabled(
     JSON.parse(fs.readFileSync("./tests.json")),
@@ -95,18 +103,13 @@ async function main() {
 
     const lBenchEntries = await test.benchLangs(langs, i, tests.length);
 
-    Entries.outEntriesTest(
-      structuredClone(lBenchEntries),
-      test.name,
-      langNames,
-      launchOptions.li == 2
-    );
-    benchEntries.push(...lBenchEntries.map(e => ((e.test = test.name), e)));
+    Entries.outEntriesTest(structuredClone(lBenchEntries));
+    benchEntries.push(...lBenchEntries);
   }
 
-  Entries.outEntriesTotal(langNames, benchEntries);
+  Entries.outEntriesTotal(benchEntries);
 
-  if (launchOptions.lh) {
+  if (launchOptions.lo) {
     const sysInfo = msgs.launchOptions.sysInfo(launchOptions.sysInfo);
     log(sysInfo);
     if (launchOptions.srt) tableFileAppned(sysInfo);

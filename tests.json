@@ -1,5 +1,7 @@
 {
   "fib":{
+    "//":"Naive recursive algorithm for calculating Fibonacci numbers",
+    "//":"The argument is the Fibonacci number",
     "src":"fib",
     "asserts":{
       "30":832040,
@@ -11,19 +13,9 @@
       "--41":165580141
     }
   },
-  "--fib multithreads":{
-    "src":"fib",
-    "multiThreads":true,
-    "asserts":{
-      "30":832040,
-      "37":24157817,
-      "38":39088169,
-      "39":63245986,
-      "++40":102334155,
-      "--41":165580141
-    }
-  },
   "monte":{
+    "//":"monteCarlo",
+    "//":"The argument is the number of iterations in the loop",
     "src":"monte",
     "asserts":{
       "441111":null,
@@ -35,14 +27,32 @@
     }
   },
   "fileio":{
+    "!!!":"creates a lot of files in the tmp directory, be careful",
+    "//":"creates a lot of files, fills them with units, and then counts the number of 64Kb chunks",
+    "//":"the first argument is the number of files, the second is the number of units in each file",
     "src":"fileio",
-    "!!!":"Будьте аккуратны, создает очень много файлов в текущей директории",
     "asserts":{
       "3111 311111":null,
       "3333 333333":null,
       "++1111 1333333":null,
       "++2222 3333333":null,
       "--1111 8888888":null
+    }
+  },
+  "sleep":{
+    "src":"sleep",
+    "asserts":{
+      "50":null,
+      "100":null
+    }
+  },
+  "erat":{
+    "src":"segErat",
+    "multiThreads":true,
+    "asserts":{
+      "8 10000000":null,
+      "--8 66633666":null,
+      "--8 193333333":null
     }
   }
 }
