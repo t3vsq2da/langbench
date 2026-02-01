@@ -6,37 +6,10 @@ export default class Lang {
   constructor(name, data) {
     this.name = name;
     Object.entries(data).forEach(([k, v]) => (this[k] = v));
+    this.folder ??= name;
+    this.run ??= this.build ? "./<app>" : name + " <app>"; //relative tmp dir
+    this.out ??= "<test-src>";
   }
-
-  static getEnabled = async (rawLangs, names, fm) => {
-    excludeDisabled(rawLangs, fm);
-
-    let entries = Object.entries(rawLangs);
-
-    if (names[0] !== ALL) {
-      const undefinedLang = names.find(tName => !(tName in rawLangs));
-      if (undefinedLang != null)
-        throw new LBError(msgs.langs.undefinedLang(undefinedLang));
-      else entries = entries.filter(([name]) => names.includes(name));
-    }
-
-    const checkReq = async (name, req) => {
-      if ((await Cmd.exec("which", req)).code)
-        throw new LBError(msgs.langs.needReq(req, name));
-    };
-
-    return await Promise.all(
-      entries.map(async ([name, data]) => {
-        if (data.folder == null)
-          throw new LBError(msgs.langs.missedFieldLang(name, "folder"));
-        if (data.req)
-          if (data.req.length)
-            for (let req of data.req) await checkReq(name, req);
-          else await checkReq(name, data.req);
-        return new Lang(name, data);
-      })
-    );
-  };
 
   findSrc = src => {
     if (!fs.existsSync(this.folder))
@@ -56,33 +29,22 @@ export default class Lang {
   };
 
   //relative tmp folder
-  getRunCmd = testSrc => {
-    if (this.run)
-      return this.run?.replaceAll(
-        "<src>",
-        path.join("../", this.findSrc(testSrc))
-      );
-    else if (this.build)
-      return this.run?.replaceAll("<src>", testSrc) ?? "./" + testSrc;
-    else throw new LBError(msgs.langs.langNoRun(this.name));
-  };
+  getRunCmd = appName => this.run.replaceAll("<app>", appName);
 
   buildStat = async testSrc => {
     const src = this.findSrc(testSrc);
-    testSrc = path.join("tmp", testSrc);
-    if (this.build) {
-      const {
-        stat: { time },
-      } = await Cmd.stat(
-        ...Cmd.fromStr(
-          this.build.replaceAll("<src>", src).replaceAll("<out>", testSrc)
-        )
-      ); //cmd, args
-      const size = fs.statSync(
-        this.out?.replace("<out>", testSrc) ?? testSrc
-      ).size;
+    const out = path.join("tmp", testSrc);
 
-      return { time, size };
-    }
+    const {
+      stat: { time },
+    } = await Cmd.stat(
+      ...Cmd.fromStr(
+        this.build.replaceAll("<src>", src).replaceAll("<out>", out)
+      )
+    );
+
+    const size = fs.statSync(this.out.replaceAll("<test-src>", out)).size;
+
+    return { time, size };
   };
 }

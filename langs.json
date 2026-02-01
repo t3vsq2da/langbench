@@ -12,20 +12,19 @@
   "java openJDK":{
     "folder":"java",
     "req":["javac","java"],
-    "build":"javac -d ./tmp ./<src>",
-    "out":"<out>.class",
-    "run":"java <src>"
+    "build":"javac -d ./tmp <src>",
+    "out-file":"<test-src>.class",
+    "run":"java <app>"
   },
   "elixir":{
     "folder":"elixir",
     "req":["elixir","elixirc"],
     "build":"elixirc --no-debug-info <src> -o tmp",
     "//":"'out' is used ONLY for measuring the file size.",
-    "out":"./tmp/Elixir.Main.beam",
+    "out-file":"Elixir.Main.beam",
     "run":"elixir --erl \"+S <threads-count> +A <threads-count> +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
   },
   "haskell":{
-    "folder":"hs",
     "req":["stack"],
     "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
     "ext":"hs"
@@ -36,9 +35,8 @@
     "build":"rustc -C opt-level=3 -C target-cpu=native -C lto=fat -C codegen-units=1 -C panic=abort <src> -o <out>"
   },
   "python":{
-    "folder":"py",
     "req":["python"],
-    "run":"python -OO -B -E -u <src>"
+    "run":"python -OO -B -E -u <app>"
   },
   "pypy3":{
     "folder":"py",

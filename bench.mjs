@@ -24,28 +24,19 @@ let tableFileText;
 
 const benchEntries = [];
 
-async function main(langs, tests) {
+async function main(langsCfg, testsCfg) {
   log("s", "init tests&langs");
-  /* const tests = Test.getEnabled(
-    JSON.parse(fs.readFileSync("./tests.json")),
-    launchOptions.t,
-    launchOptions.fm
+
+  const langs = Object.entries(langsCfg).map(
+    ([name, data]) => new Lang(name, data)
   );
-  const langs = await Lang.getEnabled(
-    JSON.parse(fs.readFileSync("./langs.json")),
-    launchOptions.l,
-    launchOptions.fm
-  ); */
-  if (langs.length == 0 || tests.length == 0) return;
 
-  log("d", "tests:", tests);
-  log("d", "langs:", langs);
+  const tests = Object.entries(testsCfg).map(
+    ([name, data]) => new Test(name, data)
+  );
 
-  const langNames = langs.map(l => l.name);
-
-  Test.attempts = launchOptions.ac;
-  Test.maxThreads = launchOptions.mt;
-  Entries.outSetSetting(launchOptions.li, tableFileAppned, jsonFileObj);
+  log("d", "langs", langs);
+  log("d", "tests", tests);
 
   fs.rmSync("tmp", { recursive: true, force: true });
   fs.mkdirSync("tmp");
@@ -56,20 +47,20 @@ async function main(langs, tests) {
     const test = tests[i];
     log("s", `start test ${test.name}`);
 
-    const lBenchEntries = await test.benchLangs(langs, i, tests.length);
+    const logCb = (tName, lName) =>
+      log(
+        "s",
+        `[test ${i + 1}/${test.length} | lang ${j + 1}/${
+          langs.length
+        }] "${tName}" (${lName})`
+      );
+    const lBenchEntries = await test.benchLangs(langs, logCb);
 
     Entries.outEntriesTest(structuredClone(lBenchEntries));
     benchEntries.push(...lBenchEntries);
   }
 
   Entries.outEntriesTotal(benchEntries);
-
-  if (launchOptions.lo) {
-    const sysInfo = msgs.launchOptions.sysInfo(launchOptions.sysInfo);
-    log(sysInfo);
-    if (launchOptions.srt) tableFileAppned(sysInfo);
-    if (launchOptions.srj) jsonFileObj.system = launchOptions.sysInfo;
-  }
 
   log(
     "s",
@@ -82,16 +73,18 @@ const mainWrapper = async () => {
   try {
     launchOptions = new LaunchOptions(process.argv);
     if (isEmpty(launchOptions)) return 0;
+
     await launchOptions.init();
+    if (isEmpty(launchOptions.langs) || isEmpty(launchOptions.tests)) return;
 
     outsFiles.init();
+    outsFiles.writeLo(log("lo", launchOptions.toString()));
 
-    const lo = launchOptions.toString();
-    log("lo", lo);
-    tableFileAppned?.("launch options:\n" + lo + "\n");
-    if (jsonFileObj && launchOptions.llo) jsonFileObj["launch options"] = lo;
+    Test.attempts = launchOptions.ac;
+    Test.maxThreads = launchOptions.mt;
+    Entries.outSetSetting(launchOptions.li, tableFileAppned, jsonFileObj);
 
-    //await main();
+    await main(launchOptions.langs, launchOptions.tests);
 
     outsFiles.save();
   } catch (err) {
@@ -114,6 +107,10 @@ const outsFiles = {
         : null;
     }
     if (launchOptions.srj) jsonFileObj = { total: null, entries: [] };
+  },
+  writeLo: lo => {
+    tableFileAppned?.("launch options:\n" + lo + "\n");
+    if (jsonFileObj && launchOptions.llo) jsonFileObj["launch options"] = lo;
   },
   save: () => {
     if (launchOptions.srt) fs.writeFileSync("bench-result.txt", tableFileText);

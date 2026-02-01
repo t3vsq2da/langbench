@@ -76,7 +76,13 @@ const _exec = (cmd, args, pwd, silent) => {
     child.on("error", reject);
 
     child.on("close", code =>
-      resolve(log("d", { stdout: stdout.trim(), stderr: stderr.trim(), code }))
+      resolve(
+        log("d", "cmd-result", {
+          stdout: stdout.trim(),
+          stderr: stderr.trim(),
+          code,
+        })
+      )
     );
   });
 };

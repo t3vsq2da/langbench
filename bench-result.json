@@ -1,1 +1,1 @@
-{"total":null,"entries":[],"launch options":"fm:true ac:5 mt:8 ls:true li:2 la:true lc:false ld:false\nlangs:'cpp gcc', 'nodejs'\ntests:'fib', 'fileio', 'sleep'"}
+{"total":null,"entries":[],"launch options":"attempt-count:1 max-threads:8 fast-modetrue\nlangs:'cpp gcc', 'java openJDK', 'elixir', 'haskell', 'python'\ntests:'fib'\nlogging: stages attempts result-of-each-test commands debug\n  "}

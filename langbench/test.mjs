@@ -17,6 +17,7 @@ export default class Test {
   constructor(name, data) {
     this.name = name;
     Object.entries(data).forEach(([k, v]) => (this[k] = v));
+    this.src ??= name;
   }
 
   bestStat = async (cmd, input, expectedOut, langN) => {
@@ -53,7 +54,7 @@ export default class Test {
     return best;
   };
 
-  bench = async (cmd, langN) => {
+  bench = async (cmd, logCb) => {
     const stats = {};
 
     if (this.asserts && Object.keys(this.asserts).length) {
@@ -71,7 +72,7 @@ export default class Test {
     return stats;
   };
 
-  benchLangs = async (langs, testIndex, testLen) => {
+  benchLangs = async (langs, logCb) => {
     const lBenchEntries = [];
     const appName = this.src;
     for (let j = 0; j < langs.length; ++j) {
@@ -83,18 +84,14 @@ export default class Test {
 
       if (this.multiThreads && Test.maxThreads >= 2) {
         cmdRun = cmdRun.replaceAll("<threads-count>", "" + Test.maxThreads);
-        cmdRun = "taskset -c 0-" + (Test.maxThreads - 1) + " " + cmdRun + "";
+        cmdRun = "taskset -c 0-" + (Test.maxThreads - 1) + " " + cmdRun;
       } else {
         cmdRun = cmdRun.replaceAll("<threads-count>", "1");
         cmdRun = "taskset -c 0 " + cmdRun + " ";
       }
 
-      log(
-        "s",
-        `[test ${testIndex + 1}/${testLen} | lang ${j + 1}/${langs.length}] "${
-          this.name
-        }" (${lang.name})`
-      );
+      logCb(this.name, lang.name);
+      const logCbAttempts = ()
       const benchResult = await this.bench(cmdRun, lang.name);
       lBenchEntries.push(
         ...Entries.parseBecnhResult(

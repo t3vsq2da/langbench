@@ -2,7 +2,6 @@
   "fib":{
     "//":"Naive recursive algorithm for calculating Fibonacci numbers",
     "//":"The argument is the Fibonacci number",
-    "src":"fib",
     "asserts":{
       "30":832040,
       "36":14930352,

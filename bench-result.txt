@@ -1,5 +1,7 @@
 launch options:
-fm:true ac:5 mt:8 ls:true li:2 la:true lc:false ld:false
-langs:'cpp gcc', 'nodejs'
-tests:'fib', 'fileio', 'sleep'
+attempt-count:1 max-threads:8 fast-modetrue
+langs:'cpp gcc', 'java openJDK', 'elixir', 'haskell', 'python'
+tests:'fib'
+logging: stages attempts result-of-each-test commands debug
+  
 

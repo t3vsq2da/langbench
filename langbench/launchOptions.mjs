@@ -60,24 +60,23 @@ class LaunchOptions {
     await this.checkRequires();
   };
 
-  toString = () => {
-    const labled = key => key + ":" + this[key];
-    let s = "";
-    s += ["fm", "ac", "mt", "ls", "li", "la", "lc", "ld"].map(labled).join(" ");
-    s +=
-      "\n" +
-      "langs:" +
-      Object.keys(this.langs)
-        .map(k => "'" + k + "'")
-        .join(", ");
-    s +=
-      "\n" +
-      "tests:" +
-      Object.keys(this.tests)
-        .map(k => "'" + k + "'")
-        .join(", ");
-    return s;
-  };
+  toString = () => `attempt-count:${this.ac} max-threads:${this.mt} fast-mode${
+    this.fm
+  }
+langs:${Object.keys(this.langs)
+    .map(k => "'" + k + "'")
+    .join(", ")}
+tests:${Object.keys(this.tests)
+    .map(k => "'" + k + "'")
+    .join(", ")}
+logging: ${this.ls && "stages"} ${this.la && "attempts"} ${
+    this.li == 1
+      ? "result-of-each-test"
+      : this.li == 2
+      ? "result-of-each-assert"
+      : ""
+  } ${this.lc && "commands"} ${this.ld && "debug"}
+  `;
 
   checkRequires = async () => {
     const checkReq = async (name, req) => {
@@ -101,7 +100,6 @@ class LaunchOptions {
   validation = () => {
     const checks = {
       ls: isType("boolean"), //log stages
-      //i deleted most of the debug messages. :)
       ld: isType("boolean"), //log debug
       lc: isType("boolean"), //log cmds
       la: isType("boolean"), //log attempts
