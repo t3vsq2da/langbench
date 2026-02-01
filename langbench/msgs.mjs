@@ -4,6 +4,8 @@ const msgs = {
       `setting '${flag}' was passed an argument(s) '${
         Array.isArray(values) ? values.join(" ") : values
       }' that failed validation.`,
+    incompatibleOptions: (opt1, opt2) =>
+      `Options '${opt1}' and options '${opt2}' are not compatible`,
     noFlag: () => `a flag (option) must be specified before the values`,
     undefinedFlag: flag => `unknown flag '${flag}'`,
     sysInfo: ({ cpu, disks, os }) => `\ncpu: '${cpu.model}' (${

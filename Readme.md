@@ -53,7 +53,7 @@ This script will configure the system so that the measurements are more accurate
 
 ### Fast run without extended tests and minimal logging:
 ```bash
-./bench.mjs -fm -ls false -li 0 -lh false
+./bench.mjs  -ls false -li 0 -lh false
 ```
 
 

@@ -23,6 +23,7 @@ export default class Test {
   bestStat = async (cmd, input, expectedOut) => {
     let best;
     cmd += " " + input;
+
     for (let i = 0; i < Test.attempts; ++i) {
       const { stdout, stat, code, stderr } = await Cmd.stat(
         ...fromStr(cmd),
@@ -46,6 +47,7 @@ export default class Test {
 
       if (best == null || Test.compareAttempts(stat, best) == -1) best = stat;
     }
+
     return best;
   };
 
@@ -53,16 +55,18 @@ export default class Test {
     const stats = {};
 
     if (this.asserts && Object.keys(this.asserts).length) {
-      for (const input in this.asserts) {
+      const assertsKeys = Object.keys(this.asserts);
+      for (let i = 0; i < assertsKeys.length; ++i) {
+        const input = assertsKeys[i];
+        if (this.onLogAsserts)
+          log("s", `[ assert:${i}/${assertsKeys.length} ] input:{${input}}`);
         stats[input] = await this.bestStat(cmd, input, this.asserts[input]);
       }
-    } else {
-      stats[""] = await this.bestStat(cmd, null, null);
-    }
+    } else stats[""] = await this.bestStat(cmd, null, null);
     return stats;
   };
 
-  benchLangs = async (langs, logCb) => {
+  benchLangs = async (langs, logCb, onLogAsserts) => {
     const lBenchEntries = [];
     const appName = this.src;
     for (let j = 0; j < langs.length; ++j) {
@@ -74,6 +78,7 @@ export default class Test {
             Test.attempts
           } : ` + msgs.benchEntires(stat)
         );
+      this.onLogAsserts = onLogAsserts;
       let buildStat;
       if (lang.build) buildStat = await lang.buildStat(appName);
 
@@ -88,7 +93,9 @@ export default class Test {
       }
 
       logCb(this.name, lang.name, j);
+      log("d", "tmp folder", fs.readdirSync("./tmp"));
       const benchResult = await this.bench(cmdRun);
+
       lBenchEntries.push(
         ...Entries.parseBecnhResult(
           benchResult,

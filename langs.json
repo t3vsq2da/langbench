@@ -1,20 +1,20 @@
 {
-  "cpp gcc":{
+  "cpp-gcc":{
     "folder":"cpp",
     "req":["g++"],
     "build":"g++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
-  "cpp clang":{
+  "cpp-clang":{
     "folder":"cpp",
     "req":["clang++"],
     "build":"clang++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
-  "java openJDK":{
+  "java-openJDK":{
     "folder":"java",
     "req":["javac","java"],
     "build":"javac -d ./tmp <src>",
     "out-file":"<test-src>.class",
-    "run":"java <app>"
+    "run":"java -XX:+OptimizeFill <app>"
   },
   "elixir":{
     "req":["elixir","elixirc"],
@@ -33,25 +33,27 @@
     "req":["rustc"],
     "build":"rustc -C opt-level=3 -C target-cpu=native -C lto=fat -C codegen-units=1 -C panic=abort <src> -o <out>"
   },
-  "python":{
+  "!!python":{
+    "//":"slower than pypy3",
     "req":["python"],
     "run":"python -OO -B -E -u <app>"
   },
   "pypy3":{
     "folder":"python",
     "req":["pypy3"],
-    "run":"pypy3 -OO -B -E -u <app>"
+    "run":"pypy3 -X no_gc_thread -OO -B -E -u <app>"
   },
-  "perl":{
-    "req":["perl"],
-    "run":"perl -d:NYTProf <app>"
+  "!!perl":{
+    "//":"It's really very slow",
+    "req":["perl"]
   },
   "nodejs":{
     "folder":"js",
     "req":["node"],
     "run":"node --no-concurrent-sweeping --predictable --max-old-space-size=4096 <app>"
   },
-  "denojs":{
+  "!!denojs":{
+    "//":"something like node",
     "folder":"js",
     "req":["deno"],
     "build":"deno compile --unstable --quiet --allow-read --allow-write --output <out> <src>"

@@ -2,5 +2,8 @@
 haskell/**
 !haskell/**/*.hs
 
+scala/**
+!scala/**/*.scala
+
 node_modules/*
 tmp/*

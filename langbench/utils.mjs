@@ -45,17 +45,26 @@ export const autoCast = value => {
 
 export const typeOf = value => {
   if (typeof value !== "string") return typeof value;
-  else if (value === "") return "string";
-  else if (value === "true" || value === "false") return "boolean";
-  else if (value === "null") return "object";
-  else if (value === "undefined") return "undefined";
-  else if (/^-?\d+.?\d*$/.test(value)) return "number";
-  else return "string";
+
+  switch (value) {
+    case "":
+      return "string";
+    case "null":
+      return "object";
+    case "undefined":
+      return "undefined";
+    case "true":
+    case "false":
+      return "boolean";
+    default:
+      return /^-?\d+\.?\d*$/.test(value) ? "number" : "string";
+  }
 };
 
 export const isType = t => v => typeOf(v) === t;
 export const inRange = (min, max, inclusive) => v =>
   v >= min && (inclusive === true ? v <= max : v < max);
+export const isArray = Array.isArray;
 export const head = a => a[0];
 
 export const isEmpty = v =>
@@ -84,22 +93,20 @@ let _log = (...msg) => (console.log("::", ...msg), msg[0]);
 export const log = (...a) => _log(...a);
 export const setLog = l => (_log = l);
 
-export const excludeDisabled = (obj, fm) => {
+export const excludeDisabled = (obj, m) => {
+  const excluded = {};
+  const excludedValue = v =>
+    typeof v == "object" && v != null && !isArray(v)
+      ? excludeDisabled(v, m)
+      : v;
   for (let key in obj) {
-    if (key.startsWith("--")) {
-      delete obj[key];
-      continue;
-    } else if (key.startsWith("++"))
-      if (fm) {
-        delete obj[key];
-        continue;
-      } else {
-        obj[key.slice(2)] = obj[key];
-        delete obj[key];
-        key = key.slice(2);
-      }
-
-    if (isType("object")(obj[key])) obj[key] = excludeDisabled(obj[key], fm);
+    const starts = key.slice(0, 2);
+    const prefix = ["--", "++", "!!", "//"].find(p => p == starts);
+    if (prefix == null) excluded[key] = excludedValue(obj[key]);
+    else if (prefix == "--" || prefix == "//") continue;
+    else if (prefix == "++" && m == "fast") continue;
+    else if (prefix == "!!" && m != "detailed") continue;
+    else excluded[key.slice(2)] = excludedValue(obj[key]);
   }
-  return obj;
+  return excluded;
 };

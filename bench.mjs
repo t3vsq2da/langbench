@@ -1,13 +1,5 @@
 #!/usr/bin/env node
-import {
-  LBError,
-  msgs,
-  isEmpty,
-  setLog,
-  log,
-  Cmd,
-  Entries,
-} from "./langbench/utils.mjs";
+import { LBError, isEmpty, setLog, log, Entries } from "./langbench/utils.mjs";
 import { format } from "./langbench/msgs.mjs";
 import LaunchOptions from "./langbench/launchOptions.mjs";
 import fs from "node:fs";
@@ -35,6 +27,9 @@ async function main(langsCfg, testsCfg) {
     ([name, data]) => new Test(name, data)
   );
 
+  log("s", "check langs src");
+  tests.forEach(({ src }) => langs.forEach(lang => lang.findSrc(src)));
+
   log("d", "langs", langs);
   log("d", "tests", tests);
 
@@ -47,14 +42,18 @@ async function main(langsCfg, testsCfg) {
     const test = tests[i];
     log("s", `start test ${test.name}`);
 
-    const logCb = (tName, lName, langI) =>
+    const logCbStage = (tName, lName, langI) =>
       log(
         "s",
         `[test ${i + 1}/${tests.length} | lang ${langI + 1}/${
           langs.length
         }] "${tName}" (${lName})`
       );
-    const lBenchEntries = await test.benchLangs(langs, logCb);
+    const lBenchEntries = await test.benchLangs(
+      langs,
+      logCbStage,
+      launchOptions.ls == 2
+    );
 
     Entries.outEntriesTest(structuredClone(lBenchEntries));
     benchEntries.push(...lBenchEntries);
@@ -98,6 +97,8 @@ const mainWrapper = async () => {
   }
 };
 
+mainWrapper();
+
 const outsFiles = {
   init: () => {
     if (launchOptions.srt) {
@@ -119,8 +120,6 @@ const outsFiles = {
       fs.writeFileSync("bench-result.json", JSON.stringify(jsonFileObj));
   },
 };
-
-mainWrapper();
 
 setLog((head, ...tail) => {
   if (isEmpty(tail)) {

@@ -8,7 +8,7 @@ export default class Lang {
     Object.entries(data).forEach(([k, v]) => (this[k] = v));
     this.folder ??= name;
     if (this.build) {
-      this.out ??= "<test-src>";
+      this["out-file"] ??= "<test-src>";
       this.run ??= "./<app>";
     } else this.run ??= name + " <app>";
   }
@@ -19,13 +19,14 @@ export default class Lang {
 
     let matches = fs.readdirSync(this.folder).filter(e => e.startsWith(src));
     if (matches.length === 0)
-      throw new LBError(msgs.langs.srcNoFound(this.name, src));
+      throw new LBError(msgs.langs.srcNoFound(this.name, this.folder, src));
     else if (this.ext != null) {
       const fullName = src + "." + this.ext;
 
       if (matches.find(f => f === fullName) != null)
         return path.join(this.folder, fullName);
-      else throw new LBError(msgs.langs.srcNoFound(this.name, fullName));
+      else
+        throw new LBError(msgs.langs.srcNoFound(this.name, this.folder, src));
     } else if (matches.length === 1) return path.join(this.folder, matches[0]);
     else throw new LBError(msgs.langs.specifyExt(this.name));
   };
@@ -42,17 +43,20 @@ export default class Lang {
 
   buildStat = async testSrc => {
     const src = this.findSrc(testSrc);
-    const out = path.join("tmp", testSrc);
+    const outApp = path.join("tmp", testSrc);
 
     const {
       stat: { time },
     } = await Cmd.stat(
       ...Cmd.fromStr(
-        this.build.replaceAll("<src>", src).replaceAll("<out>", out)
+        this.build.replaceAll("<src>", src).replaceAll("<out>", outApp)
       )
     );
-
-    const size = fs.statSync(this.out.replaceAll("<test-src>", out)).size;
+    const outFile = path.join(
+      "./tmp",
+      this["out-file"].replaceAll("<test-src>", testSrc)
+    );
+    const size = fs.statSync(outFile).size;
 
     return { time, size };
   };

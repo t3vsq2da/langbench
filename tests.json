@@ -7,26 +7,26 @@
       "36":14930352,
       "37":24157817,
       "++38":39088169,
-      "--39":63245986,
+      "!!39":63245986,
       "--40":102334155,
       "--41":165580141
     }
   },
-  "monte":{
-    "//":"monteCarlo",
+  "monte-carlo":{
+    "//":"monte",
     "//":"The argument is the number of iterations in the loop",
     "src":"monte",
     "asserts":{
-      "441111":null,
-      "1111111":null,
-      "21212121":null,
-      "++33344333":null,
-      "++46344364":null,
-      "--44444444":null
+      "11111111":null,
+      "22222222":null,
+      "33333333":null,
+      "++44444444":null,
+      "++55555555":null,
+      "!!66666666":null
     }
   },
   "fileio":{
-    "!!!":"creates a lot of files in the tmp directory, be careful",
+    "//":"creates a lot of files in the tmp directory, be careful",
     "//":"creates a lot of files, fills them with units, and then counts the number of 64Kb chunks",
     "//":"the first argument is the number of files, the second is the number of units in each file",
     "src":"fileio",
@@ -38,7 +38,8 @@
       "--1111 8888888":null
     }
   },
-  "sleep":{
+  "--sleep":{
+    "//":"just checking the time measurement",
     "src":"sleep",
     "asserts":{
       "50":null,
@@ -49,8 +50,10 @@
     "src":"segErat",
     "multiThreads":true,
     "asserts":{
-      "8 10000000":null,
-      "--8 66633666":null,
+      "6 6666666":null,
+      "8 11111111":null,
+      "8 33333333":null,
+      "20 33333333":null,
       "--8 193333333":null
     }
   }
