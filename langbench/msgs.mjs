@@ -41,10 +41,10 @@ cmd:'${cmd}' code:'${code}'
 ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
   },
   langs: {
-    srcNoFound: (lang, name) =>
-      `file '${name}' for language '${lang}' was not found.`,
+    srcNoFound: (lang, folder, name) =>
+      `src '${name}' in dir '${folder}' for language '${lang}' was not found.`,
     specifyExt: lang =>
-      `The source file of language '${lang}' could not be identified. Specify the extension in the language configuration`,
+      `the source file of language '${lang}' could not be identified. Specify the extension in the language configuration`,
     missedFieldLang: (lName, field) =>
       `missing field '${field}' in the programming language configuration '${lName}'`,
     langNoRun: langName =>

@@ -17,7 +17,6 @@
     "run":"java <app>"
   },
   "elixir":{
-    "folder":"elixir",
     "req":["elixir","elixirc"],
     "build":"elixirc --no-debug-info <src> -o tmp",
     "//":"'out' is used ONLY for measuring the file size.",
@@ -39,19 +38,18 @@
     "run":"python -OO -B -E -u <app>"
   },
   "pypy3":{
-    "folder":"py",
+    "folder":"python",
     "req":["pypy3"],
-    "run":"pypy3 -OO -B -E -u <src>"
+    "run":"pypy3 -OO -B -E -u <app>"
   },
   "perl":{
-    "folder":"perl",
     "req":["perl"],
-    "run":"perl <src>"
+    "run":"perl -d:NYTProf <app>"
   },
   "nodejs":{
     "folder":"js",
     "req":["node"],
-    "run":"node --no-concurrent-sweeping --predictable --max-old-space-size=4096 <src>"
+    "run":"node --no-concurrent-sweeping --predictable --max-old-space-size=4096 <app>"
   },
   "denojs":{
     "folder":"js",
@@ -59,12 +57,10 @@
     "build":"deno compile --unstable --quiet --allow-read --allow-write --output <out> <src>"
   },
   "nim":{
-    "folder":"nim",
     "req":["nim"],
     "build":"nim c -d:release --verbosity:0 --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src>"
   },
   "go":{
-    "folder":"go",
     "req":["go"],
     "build":"go build -ldflags=\"-s -w\" -trimpath -o <out> <src>"
   }

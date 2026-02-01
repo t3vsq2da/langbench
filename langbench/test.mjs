@@ -20,7 +20,7 @@ export default class Test {
     this.src ??= name;
   }
 
-  bestStat = async (cmd, input, expectedOut, langN) => {
+  bestStat = async (cmd, input, expectedOut) => {
     let best;
     cmd += " " + input;
     for (let i = 0; i < Test.attempts; ++i) {
@@ -28,12 +28,7 @@ export default class Test {
         ...fromStr(cmd),
         "tmp"
       );
-      log(
-        "a",
-        `${this.name}[${input}] {${langN}} attempt ${i + 1}/${
-          Test.attempts
-        } : ` + msgs.benchEntires(stat)
-      );
+      this.logAttempt(input, stat, i);
       if (
         expectedOut != null &&
         stdout.toString().trim() != expectedOut.toString().trim()
@@ -54,20 +49,15 @@ export default class Test {
     return best;
   };
 
-  bench = async (cmd, logCb) => {
+  bench = async cmd => {
     const stats = {};
 
     if (this.asserts && Object.keys(this.asserts).length) {
       for (const input in this.asserts) {
-        stats[input] = await this.bestStat(
-          cmd,
-          input,
-          this.asserts[input],
-          langN
-        );
+        stats[input] = await this.bestStat(cmd, input, this.asserts[input]);
       }
     } else {
-      stats[""] = await this.bestStat(cmd, null, null, langN);
+      stats[""] = await this.bestStat(cmd, null, null);
     }
     return stats;
   };
@@ -77,6 +67,13 @@ export default class Test {
     const appName = this.src;
     for (let j = 0; j < langs.length; ++j) {
       const lang = langs[j];
+      this.logAttempt = (input, stat, attemptI) =>
+        log(
+          "a",
+          `${this.name}[${input}] {${lang.name}} attempt ${attemptI + 1}/${
+            Test.attempts
+          } : ` + msgs.benchEntires(stat)
+        );
       let buildStat;
       if (lang.build) buildStat = await lang.buildStat(appName);
 
@@ -90,9 +87,8 @@ export default class Test {
         cmdRun = "taskset -c 0 " + cmdRun + " ";
       }
 
-      logCb(this.name, lang.name);
-      const logCbAttempts = ()
-      const benchResult = await this.bench(cmdRun, lang.name);
+      logCb(this.name, lang.name, j);
+      const benchResult = await this.bench(cmdRun);
       lBenchEntries.push(
         ...Entries.parseBecnhResult(
           benchResult,

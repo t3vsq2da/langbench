@@ -47,10 +47,10 @@ async function main(langsCfg, testsCfg) {
     const test = tests[i];
     log("s", `start test ${test.name}`);
 
-    const logCb = (tName, lName) =>
+    const logCb = (tName, lName, langI) =>
       log(
         "s",
-        `[test ${i + 1}/${test.length} | lang ${j + 1}/${
+        `[test ${i + 1}/${tests.length} | lang ${langI + 1}/${
           langs.length
         }] "${tName}" (${lName})`
       );

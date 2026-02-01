@@ -1,4 +1,4 @@
-import { LBError, excludeDisabled, msgs, ALL, Cmd } from "./utils.mjs";
+import { LBError, excludeDisabled, msgs, Cmd } from "./utils.mjs";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -7,13 +7,15 @@ export default class Lang {
     this.name = name;
     Object.entries(data).forEach(([k, v]) => (this[k] = v));
     this.folder ??= name;
-    this.run ??= this.build ? "./<app>" : name + " <app>"; //relative tmp dir
-    this.out ??= "<test-src>";
+    if (this.build) {
+      this.out ??= "<test-src>";
+      this.run ??= "./<app>";
+    } else this.run ??= name + " <app>";
   }
 
   findSrc = src => {
     if (!fs.existsSync(this.folder))
-      throw new LBError(msgs.langs.srcNoFound(this.name, src));
+      throw new LBError(msgs.langs.srcNoFound(this.name, this.folder, src));
 
     let matches = fs.readdirSync(this.folder).filter(e => e.startsWith(src));
     if (matches.length === 0)
@@ -29,7 +31,14 @@ export default class Lang {
   };
 
   //relative tmp folder
-  getRunCmd = appName => this.run.replaceAll("<app>", appName);
+  getRunCmd = appName => {
+    if (this.build) return this.run.replaceAll("<app>", appName);
+    else
+      return this.run.replaceAll(
+        "<app>",
+        path.join("../", this.findSrc(appName))
+      );
+  };
 
   buildStat = async testSrc => {
     const src = this.findSrc(testSrc);
