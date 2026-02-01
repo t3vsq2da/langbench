@@ -49,17 +49,17 @@ const pwdPaths = {
   root: rootFolder,
 };
 
-const preprocessed = (cmd, args, pwd) => {
+const preprocessed = (cmd, args, pwd, silent) => {
   pwd = pwdPaths[pwd ?? "root"];
 
   if (isEmpty(args)) args = [];
   else if (typeof args === "string") args = [args];
-  return [cmd, args, pwd];
+  return [cmd, args, pwd, silent];
 };
 
-const _exec = (cmd, args, pwd) => {
+const _exec = (cmd, args, pwd, silent) => {
   return new Promise((resolve, reject) => {
-    log("c", "(", pwd, ")", [cmd, ...args].join(" "));
+    if (!silent) log("c", "(", pwd, ")", [cmd, ...args].join(" "));
 
     const child = spawn(cmd, args, {
       stdio: ["pipe", "pipe", "pipe"],
@@ -81,17 +81,17 @@ const _exec = (cmd, args, pwd) => {
   });
 };
 
-export const exec = async (cmd, args, pwd) => {
-  return await _exec(...preprocessed(cmd, args, pwd));
+export const exec = async (cmd, args, pwd, silent) => {
+  return await _exec(...preprocessed(cmd, args, pwd, silent));
 };
 
 //use Cmd.stat(cmd, [input], "tmp");
-export const stat = async (cmd, args, pwd) => {
-  [cmd, args, pwd] = preprocessed(cmd, args, pwd);
+export const stat = async (cmd, args, pwd, silent) => {
+  [cmd, args, pwd, silent] = preprocessed(cmd, args, pwd);
   args.unshift("-f", "'%U %S %M %P'", /* "taskset", "-c", "0", */ cmd);
   cmd = "/usr/bin/time";
 
-  const { stdout, stderr, code } = await _exec(cmd, args, pwd);
+  const { stdout, stderr, code } = await _exec(cmd, args, pwd, silent);
 
   const stderrLines = stderr.split("\n");
   stderrLines.pop();

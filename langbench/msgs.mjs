@@ -11,6 +11,9 @@ const msgs = {
     } threads)
 discs: '${disks.join(" ")}'
 os: ${os.platform}(${os.release}) arch:${os.arch}`,
+    undefinedName: (file, name) =>
+      `name ${name} was not found in config ${file}`,
+    needReq: (nameE, req) => `requires dependency '${req}' for '${nameE}'`,
   },
   utils: {
     incorrectType: (func, type, value) =>
@@ -42,16 +45,12 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
       `file '${name}' for language '${lang}' was not found.`,
     specifyExt: lang =>
       `The source file of language '${lang}' could not be identified. Specify the extension in the language configuration`,
-    undefinedLang: name => `unrecognized lang name '${name}'`,
     missedFieldLang: (lName, field) =>
       `missing field '${field}' in the programming language configuration '${lName}'`,
-    needReq: (req, lName) =>
-      `${lName ? `language '${lName}' ` : ""}requires dependency '${req}'`,
     langNoRun: langName =>
       `it is not possible to define a command to run in language '${langName}'`,
   },
   tests: {
-    undefinedTest: name => `unrecognized test name '${name}'`,
     missedFieldTest: (tName, field) =>
       `missing field '${field}' in test configuration '${tName}'`,
   },

@@ -15,63 +15,18 @@ import Test from "./langbench/test.mjs";
 import Lang from "./langbench/lang.mjs";
 import process from "process";
 
-const launchOptions = new LaunchOptions(process.argv);
+let launchOptions;
 
-setLog((head, ...tail) => {
-  if (isEmpty(tail)) {
-    console.log(head);
-    return head;
-  } else if (launchOptions["l" + head]) {
-    const prefix = log.prefixs[head];
-    if (prefix) console.log(prefix, ...tail);
-    else console.log(tail);
-  }
-  return tail.at(-1);
-});
+let jsonFileObj;
 
-log.prefixs = {
-  i: "[i]", //individual
-  s: "[s]", //stage
-  c: "[c]", //command
-  a: "[a]", //attempt
-  d: "[d]", //debug
-};
-
-let tableFileText = "";
-const tableFileAppned = launchOptions.srt
-  ? txt => (tableFileText += (txt != null ? txt : "") + "\n")
-  : null;
-let jsonFileObj = launchOptions.srt ? { total: null, entries: [] } : null;
+let tableFileAppned;
+let tableFileText;
 
 const benchEntries = [];
 
-async function main() {
-  if (isEmpty(launchOptions)) return;
-
-  if ((await Cmd.exec("ls", "/usr/bin/time")).code)
-    throw new LBError(msgs.langs.needReq("/usr/bin/time"));
-
-  if ((await Cmd.exec("which", "taskset")).code)
-    throw new LBError(msgs.langs.needReq("taskset"));
-
-  launchOptions.sysInfo = await LaunchOptions.sysInfo();
-
-  const logCores = launchOptions.sysInfo.cpu.logicalCores;
-
-  if (launchOptions.mt == null)
-    launchOptions.mt = Math.min(4, Math.max(logCores - 1, 1));
-  else if (launchOptions.mt != null && launchOptions.mt >= logCores)
-    throw new LBError(msgs.launchOptions.validArgFail("mt", launchOptions.mt));
-
-  log(
-    "o",
-    Object.entries(launchOptions)
-      .map(([k, v]) => k + ":" + v)
-      .join("\n")
-  );
-
+async function main(langs, tests) {
   log("s", "init tests&langs");
-  const tests = Test.getEnabled(
+  /* const tests = Test.getEnabled(
     JSON.parse(fs.readFileSync("./tests.json")),
     launchOptions.t,
     launchOptions.fm
@@ -80,7 +35,7 @@ async function main() {
     JSON.parse(fs.readFileSync("./langs.json")),
     launchOptions.l,
     launchOptions.fm
-  );
+  ); */
   if (langs.length == 0 || tests.length == 0) return;
 
   log("d", "tests:", tests);
@@ -116,11 +71,6 @@ async function main() {
     if (launchOptions.srj) jsonFileObj.system = launchOptions.sysInfo;
   }
 
-  if (launchOptions.srt) fs.writeFileSync("bench-result.txt", tableFileText);
-
-  if (launchOptions.srj)
-    fs.writeFileSync("bench-result.json", JSON.stringify(jsonFileObj));
-
   log(
     "s",
     "the benchmark was completed in " +
@@ -130,7 +80,20 @@ async function main() {
 
 const mainWrapper = async () => {
   try {
-    await main();
+    launchOptions = new LaunchOptions(process.argv);
+    if (isEmpty(launchOptions)) return 0;
+    await launchOptions.init();
+
+    outsFiles.init();
+
+    const lo = launchOptions.toString();
+    log("lo", lo);
+    tableFileAppned?.("launch options:\n" + lo + "\n");
+    if (jsonFileObj && launchOptions.llo) jsonFileObj["launch options"] = lo;
+
+    //await main();
+
+    outsFiles.save();
   } catch (err) {
     if (err instanceof LBError) {
       console.error("\nLANG BENCH ERROR!");
@@ -142,4 +105,43 @@ const mainWrapper = async () => {
   }
 };
 
+const outsFiles = {
+  init: () => {
+    if (launchOptions.srt) {
+      tableFileText = "";
+      tableFileAppned = launchOptions.srt
+        ? txt => (tableFileText += (txt != null ? txt : "") + "\n")
+        : null;
+    }
+    if (launchOptions.srj) jsonFileObj = { total: null, entries: [] };
+  },
+  save: () => {
+    if (launchOptions.srt) fs.writeFileSync("bench-result.txt", tableFileText);
+
+    if (launchOptions.srj)
+      fs.writeFileSync("bench-result.json", JSON.stringify(jsonFileObj));
+  },
+};
+
 mainWrapper();
+
+setLog((head, ...tail) => {
+  if (isEmpty(tail)) {
+    console.log(head);
+    return head;
+  } else if (launchOptions["l" + head]) {
+    const prefix = log.prefixs[head];
+    if (prefix) console.log(prefix, ...tail);
+    else console.log(tail);
+  }
+  return tail.at(-1);
+});
+
+log.prefixs = {
+  i: "[i]", //individual
+  s: "[s]", //stage
+  c: "[c]", //command
+  a: "[a]", //attempt
+  d: "[d]", //debug
+  lo: "[lo]", //launch options
+};

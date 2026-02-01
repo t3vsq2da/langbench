@@ -11,33 +11,9 @@ export const parseBecnhResult = (benchResult, testName, langName, buildStat) =>
 
 export const outEntriesTest = entries => {
   viewTest(entries);
-  outSetting?.srjObj.entries.push(...entries);
+  outSetting.srjObj?.entries.push(...entries);
 };
 
-export const outEntriesTotal = entries => {
-  const grouped = groupByLang(entries);
-  viewEntries("total", grouped);
-  if (outSetting.srjObj) outSetting.srjObj.total = grouped;
-};
-
-let outSetting = {};
-export const outSetSetting = (li, srtFn, srjObj) =>
-  (outSetting = { li, outputs: [console.log, srtFn].filter(Boolean), srjObj });
-
-const sortBenchEntries = (a, b) => a.time - b.time || a.mem - b.mem;
-
-export const viewEntries = (head, entries) => {
-  outSetting.outputs.forEach(out => {
-    out(); //newline
-    out(
-      msgs.table(
-        head,
-        ["lang", "time", "mem", "cpu%", "build time", "build size"],
-        format.benchEntires(entries.sort(sortBenchEntries))
-      )
-    );
-  });
-};
 export const viewTest = entries => {
   const testName = entries[0].test;
   if (outSetting.li) {
@@ -52,6 +28,30 @@ export const viewTest = entries => {
 
   viewEntries(testName, groupByLang(entries));
 };
+
+export const outEntriesTotal = entries => {
+  const grouped = groupByLang(entries);
+  viewEntries("total", grouped);
+  if (outSetting.srjObj) outSetting.srjObj.total = grouped;
+};
+
+export const viewEntries = (head, entries) => {
+  outSetting.outputs.forEach(out => {
+    out(); //newline
+    out(
+      msgs.table(
+        head,
+        ["lang", "time", "mem", "cpu%", "build time", "build size"],
+        format.benchEntires(entries.sort(sortBenchEntries))
+      )
+    );
+  });
+};
+
+let outSetting = {};
+export const outSetSetting = (li, srtFn, srjObj) =>
+  (outSetting = { li, outputs: [console.log, srtFn].filter(Boolean), srjObj });
+const sortBenchEntries = (a, b) => a.time - b.time || a.mem - b.mem;
 
 const groupByLang = entries =>
   [...new Set(entries.map(e => e.lang))].map(lang => {

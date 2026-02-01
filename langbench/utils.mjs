@@ -80,7 +80,7 @@ export const map =
   a =>
     a.map(pipe(...funcs));
 
-let _log = (...msg) => (console.log("BASELOG:", ...msg), msg[0]);
+let _log = (...msg) => (console.log("::", ...msg), msg[0]);
 export const log = (...a) => _log(...a);
 export const setLog = l => (_log = l);
 

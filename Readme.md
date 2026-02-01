@@ -32,7 +32,7 @@ Run the benchmark:
 | `-lc`      | `log-commands`     | `true` / `false`                       | Log all executed system commands. |
 | `-la`      | `log-attempts`     | `true` / `false`                       | Show detailed output for each individual measurement attempt. |
 | `-li`      | `log-individual`   | `0`, `1`, `2`                          | Per-test logging verbosity:<br>• `0` — only overall summary<br>• `1` — results for each individual test<br>• `2` — more detailed information for each test |
-| `-lh`      | `log-hardware`     | `true` / `false`                       | Print hardware and OS information before testing. |
+| `-llo`         | `log-launch-options`   | `true` / `false` | Displays startup options and system information.|
 | `-srt` | save-result-table | true / false | Saves test results to bench-result.txt in the current directory. The file content exactly matches the tabular output shown in the console. |
 | `-srj` | save-result-json | true / false | Saves test results to bench-result.json in the current directory. The file contains raw JSON data, which differs from the console output. |
 
@@ -62,7 +62,7 @@ This script will configure the system so that the measurements are more accurate
 
 Each programming language is defined as a separate key and may include the following fields:
 
-- **`folder`** — path to the directory containing source code files for this language.  
+- **`folder`** *(optional)* — path to the directory containing source code files for this language.  
 - **`req`** *(optional)* — list of required tools (e.g., `gcc`, `node`, `elixir`). If any are missing, LangBench will warn you before running tests.  
 - **`build`** *(optional)* — command to compile the program. It supports placeholders:  
   - `<src>` → replaced with the full path to the source file,  

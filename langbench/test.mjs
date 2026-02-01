@@ -12,31 +12,12 @@ import fs from "fs";
 
 export default class Test {
   static attempts;
-  static compareAttempts = (a, b) => a.time - b.time;
+  static compareAttempts = (a, b) => a.time - b.time || a.mem - b.mem;
 
   constructor(name, data) {
     this.name = name;
     Object.entries(data).forEach(([k, v]) => (this[k] = v));
   }
-
-  static getEnabled = (rawTests, names, fm) => {
-    excludeDisabled(rawTests, fm);
-
-    let entries = Object.entries(rawTests);
-
-    if (names[0] !== ALL) {
-      const undefinedTest = names.find(tName => !(tName in rawTests));
-      if (undefinedTest != null)
-        throw new LBError(msgs.tests.undefinedTest(undefinedTest));
-      else entries = entries.filter(([name]) => names.includes(name));
-    }
-
-    return entries.map(([name, data]) => {
-      if (data.src == null)
-        throw new LBError(msgs.tests.missedFieldTest(name, "src"));
-      return new Test(name, data);
-    });
-  };
 
   bestStat = async (cmd, input, expectedOut, langN) => {
     let best;
