@@ -3,6 +3,7 @@ import { log, LBError, msgs, isEmpty } from "./utils.mjs";
 import process from "process";
 import path from "path";
 
+//!! USE IT EXCLUSIVELY where the text is written as a literal - it does not depend on user input
 export const fromStr = str => {
   const words = [];
   let i = 0;

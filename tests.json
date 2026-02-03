@@ -51,5 +51,12 @@
       "<threads> 6666666":null,
       "<threads> 33333333":null
     }
+  },
+  "http":{
+    "src":"http",
+    "multiThreads":true,
+    "asserts":{
+      
+    }
   }
 }

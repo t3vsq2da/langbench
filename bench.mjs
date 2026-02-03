@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { LBError, isEmpty, setLog, log, Entries } from "./langbench/utils.mjs";
-import { format } from "./langbench/msgs.mjs";
+import msgs, { format } from "./langbench/msgs.mjs";
 import LaunchOptions from "./langbench/launchOptions.mjs";
 import fs from "node:fs";
 import Test from "./langbench/test.mjs";
@@ -45,15 +45,16 @@ async function main(langsCfg, testsCfg) {
     const logCbStage = (tName, lName, langI) =>
       log(
         "s",
-        `[test ${i + 1}/${tests.length} | lang ${langI + 1}/${
-          langs.length
-        }] "${tName}" (${lName})`
+        msgs.tests.currentLang(
+          tests.length,
+          langs.length,
+          tName,
+          lName,
+          i,
+          langI
+        )
       );
-    const lBenchEntries = await test.benchLangs(
-      langs,
-      logCbStage,
-      launchOptions.ls == 2
-    );
+    const lBenchEntries = await test.benchLangs(langs, logCbStage);
 
     Entries.outEntriesTest(structuredClone(lBenchEntries));
     benchEntries.push(...lBenchEntries);
@@ -81,6 +82,7 @@ const mainWrapper = async () => {
 
     Test.attempts = launchOptions.ac;
     Test.maxThreads = launchOptions.mt;
+    Test.onLogAsserts = launchOptions.ls == 2;
     Entries.outSetSetting(launchOptions.li, tableFileAppned, jsonFileObj);
 
     await main(launchOptions.langs, launchOptions.tests);

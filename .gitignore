@@ -8,5 +8,7 @@ scala/**
 ocaml/**
 !ocaml/**/*.ml
 
+python/__pycache__/*
+
 node_modules/*
 tmp/*

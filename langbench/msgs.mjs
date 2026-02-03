@@ -64,6 +64,16 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
   tests: {
     missedFieldTest: (tName, field) =>
       `missing field '${field}' in test configuration '${tName}'`,
+    currentLang: (testsL, langsL, tName, lName, testI, langI) =>
+      `[test ${langI + 1}/${testsL} | lang ${
+        langI + 1
+      }/${langsL}] "${tName}" (${lName})`,
+    currentAttempt: (testName, attempsCount, langName, input, stat, attemptI) =>
+      `${testName}[${input}] {${langName}} attempt ${
+        attemptI + 1
+      }/${attempsCount} : ` + msgs.benchEntires(stat),
+    currentAssert: (assertI, assertsL, input) =>
+      `[ assert:${assertI + 1}/${assertsL} ] input:{${input}}`,
   },
   benchEntires: e =>
     `t:${format.time(e.time)} m:${format.mem(e.mem)} cpu%:${e.cpu}`,

@@ -12,6 +12,7 @@ import fs from "fs";
 
 export default class Test {
   static attempts;
+  static onLogAsserts;
   static compareAttempts = (a, b) => a.time - b.time || a.mem - b.mem;
 
   constructor(name, data) {
@@ -22,9 +23,9 @@ export default class Test {
 
   bestStat = async (cmd, input, expectedOut) => {
     let best;
-    console.log(cmd);
-    if (cmd.includes("<input>")) cmd = cmd.replaceAll("<input>", input);
-    else cmd += " " + input;
+    if (input)
+      if (cmd.includes("<input>")) cmd = cmd.replaceAll("<input>", input);
+      else cmd += " " + input;
 
     for (let i = 0; i < Test.attempts; ++i) {
       const { stdout, stat, code, stderr } = await Cmd.stat(
@@ -60,18 +61,17 @@ export default class Test {
       const assertsKeys = Object.keys(this.asserts);
       for (let i = 0; i < assertsKeys.length; ++i) {
         const input = assertsKeys[i].replaceAll("<threads>", Test.maxThreads);
-        if (this.onLogAsserts)
-          log(
-            "s",
-            `[ assert:${i + 1}/${assertsKeys.length} ] input:{${input}}`
-          );
+
+        if (Test.onLogAsserts)
+          log("s", msgs.currentAssert(i, assertsKeys.length, input));
+
         stats[input] = await this.bestStat(cmd, input, this.asserts[input]);
       }
     } else stats[""] = await this.bestStat(cmd, null, null);
     return stats;
   };
 
-  benchLangs = async (langs, logCb, onLogAsserts) => {
+  benchLangs = async (langs, logCb) => {
     const lBenchEntries = [];
     const appName = this.src;
     for (let j = 0; j < langs.length; ++j) {
@@ -79,23 +79,25 @@ export default class Test {
       this.logAttempt = (input, stat, attemptI) =>
         log(
           "a",
-          `${this.name}[${input}] {${lang.name}} attempt ${attemptI + 1}/${
-            Test.attempts
-          } : ` + msgs.benchEntires(stat)
+          msgs.tests.currentAttempt(
+            this.name,
+            Test.attempts,
+            lang.name,
+            input,
+            stat,
+            attemptI
+          )
         );
-      this.onLogAsserts = onLogAsserts;
       let buildStat;
       if (lang.build) buildStat = await lang.buildStat(appName);
 
-      let cmdRun = lang.getRunCmd(appName);
-
-      if (this.multiThreads && Test.maxThreads >= 2) {
-        cmdRun = cmdRun.replaceAll("<threads-count>", "" + Test.maxThreads);
-        cmdRun = "taskset -c 0-" + (Test.maxThreads - 1) + " " + cmdRun;
-      } else {
-        cmdRun = cmdRun.replaceAll("<threads-count>", "1");
-        cmdRun = "taskset -c 0 " + cmdRun + " ";
-      }
+      const threads =
+        this.multiThreads && Test.maxThreads >= 2 ? Test.maxThreads : 1;
+      const cmdRun =
+        "taskset -c 0-" +
+        (threads - 1) +
+        " " +
+        lang.getRunCmd(appName).replaceAll("<threads-count>", threads);
 
       logCb(this.name, lang.name, j);
       log("d", "tmp folder", fs.readdirSync("./tmp"));
