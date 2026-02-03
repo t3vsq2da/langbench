@@ -3,6 +3,10 @@
 **LangBench** is a utility for comparing the performance of programs written in different programming languages.  
 It automatically runs benchmarks, measures execution time, memory usage, and other system metrics, then outputs summarized results.
 
+# TODO
+
+реализовать паралельный запуск, и добавить для языков(в langs.json) опцию для уменьшения кол-ва попыток для конкретных языков(для оч медленных, в том числе elixir)
+
 [English](Readme.md) | [Русский](Readme.ru.md)
 
 ## Running
@@ -83,7 +87,7 @@ Each test is defined as a separate key and includes:
   - Keys are command-line arguments passed to the program.  
   - Values are the **exact expected output** (including newlines).  
   - If a value is `null`, output validation is **skipped** for that run (only exit code or performance is checked).
-- **`multiThreads`** *(optional)* — if the value is `true', programs can be executed in multiple threads (via `taskset -c`)
+- **`multiThreads`** *(optional)* — if the value is `true', programs can be executed in multiple threads (via `taskset -c` )
 
 ## Special Name Prefixes
 

@@ -102,7 +102,19 @@ export const stat = async (cmd, args, pwd, silent) => {
   const stderrLines = stderr.split("\n");
   stderrLines.pop();
 
-  const splittedRes = stderr.replace(/^'|'$/, "").split(" ");
+  if (code)
+    throw new LBError(
+      msgs.utils.execCommandFail(
+        cmd + " " + args.join(" "),
+        stdout,
+        stderrLines.join("\n"),
+        code
+      )
+    );
+
+  const lastLine = stderr.split("\n").at(-1);
+  const splittedRes = lastLine.replace(/^'|'$/, "").split(" ");
+
   if (splittedRes.length != 4)
     throw new LBError(
       msgs.utils.incorrectOutput(

@@ -18,6 +18,15 @@ os: ${os.platform}(${os.release}) arch:${os.arch}`,
     needReq: (nameE, req) => `requires dependency '${req}' for '${nameE}'`,
   },
   utils: {
+    execCommandFail: (
+      cmd,
+      stdout,
+      stderr,
+      code
+    ) => `No zero code when running the command
+cmd:'${cmd}' code:'${code}'\
+${stdout?.trim().length ? `\n[stdout-start]\n${stdout}\n[stdout-start]` : ""}\
+${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
     incorrectType: (func, type, value) =>
       `@incorrectType: func:'${func}'\n expected:'${type}'\n value:'${value}'\n recivedType:'${typeof value}'`,
     incorrectOutput: (

@@ -22,7 +22,9 @@ export default class Test {
 
   bestStat = async (cmd, input, expectedOut) => {
     let best;
-    cmd += " " + input;
+    console.log(cmd);
+    if (cmd.includes("<input>")) cmd = cmd.replaceAll("<input>", input);
+    else cmd += " " + input;
 
     for (let i = 0; i < Test.attempts; ++i) {
       const { stdout, stat, code, stderr } = await Cmd.stat(
@@ -57,9 +59,12 @@ export default class Test {
     if (this.asserts && Object.keys(this.asserts).length) {
       const assertsKeys = Object.keys(this.asserts);
       for (let i = 0; i < assertsKeys.length; ++i) {
-        const input = assertsKeys[i];
+        const input = assertsKeys[i].replaceAll("<threads>", Test.maxThreads);
         if (this.onLogAsserts)
-          log("s", `[ assert:${i}/${assertsKeys.length} ] input:{${input}}`);
+          log(
+            "s",
+            `[ assert:${i + 1}/${assertsKeys.length} ] input:{${input}}`
+          );
         stats[input] = await this.bestStat(cmd, input, this.asserts[input]);
       }
     } else stats[""] = await this.bestStat(cmd, null, null);

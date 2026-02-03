@@ -3,13 +3,11 @@
     "//":"Naive recursive algorithm for calculating Fibonacci numbers",
     "//":"The argument is the Fibonacci number",
     "asserts":{
-      "30":832040,
+      "34":5702887,
       "36":14930352,
       "37":24157817,
       "++38":39088169,
-      "!!39":63245986,
-      "--40":102334155,
-      "--41":165580141
+      "!!39":63245986
     }
   },
   "monte-carlo":{
@@ -31,11 +29,10 @@
     "//":"the first argument is the number of files, the second is the number of units in each file",
     "src":"fileio",
     "asserts":{
-      "3111 311111":null,
-      "3333 333333":null,
-      "++1111 1333333":null,
-      "++2222 3333333":null,
-      "--1111 8888888":null
+      "1000 300000":4577,
+      "2000 400000":12207,
+      "++1100 1111111":18649,
+      "!!2000 1111111":33908
     }
   },
   "--sleep":{
@@ -46,15 +43,13 @@
       "100":null
     }
   },
-  "erat":{
-    "src":"segErat",
+  "parallel-monte":{
+    "src":"parallelMonte",
     "multiThreads":true,
     "asserts":{
-      "6 6666666":null,
-      "8 11111111":null,
-      "8 33333333":null,
-      "20 33333333":null,
-      "--8 193333333":null
+      "<threads> 1000000":null,
+      "<threads> 6666666":null,
+      "<threads> 33333333":null
     }
   }
 }

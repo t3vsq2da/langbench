@@ -5,5 +5,8 @@ haskell/**
 scala/**
 !scala/**/*.scala
 
+ocaml/**
+!ocaml/**/*.ml
+
 node_modules/*
 tmp/*

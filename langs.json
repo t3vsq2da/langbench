@@ -9,14 +9,15 @@
     "req":["clang++"],
     "build":"clang++ -O3 -march=native -flto -DNDEBUG <src> -o <out>"
   },
-  "java-openJDK":{
+  "java":{
     "folder":"java",
     "req":["javac","java"],
     "build":"javac -d ./tmp <src>",
     "out-file":"<test-src>.class",
     "run":"java -XX:+OptimizeFill <app>"
   },
-  "elixir":{
+  "!!elixir":{
+    "//":"It's really very slow",
     "req":["elixir","elixirc"],
     "build":"elixirc --no-debug-info <src> -o tmp",
     "//":"'out' is used ONLY for measuring the file size.",
@@ -25,7 +26,8 @@
   },
   "haskell":{
     "req":["stack"],
-    "build":"stack ghc -- -Wno-x-partial -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
+    "build":"stack ghc -- -Wno-x-partial -threaded -rtsopts -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
+    "run":"./<app> <input> +RTS -N8",
     "ext":"hs"
   },
   "rust":{
@@ -43,8 +45,8 @@
     "req":["pypy3"],
     "run":"pypy3 -X no_gc_thread -OO -B -E -u <app>"
   },
-  "!!perl":{
-    "//":"It's really very slow",
+  "++perl":{
+    "//":"It's slow",
     "req":["perl"]
   },
   "nodejs":{
@@ -60,10 +62,14 @@
   },
   "nim":{
     "req":["nim"],
-    "build":"nim c -d:release --verbosity:0 --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src>"
+    "build":"nim c -d:release --threads:on --profiler:on --verbosity:0 --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src>"
   },
   "go":{
     "req":["go"],
     "build":"go build -ldflags=\"-s -w\" -trimpath -o <out> <src>"
+  },
+  "ocaml":{
+    "ext":"ml",
+    "build":"ocamlopt -inline 100 -unbox-closures -nodynlink -noassert -unsafe -ccopt -O3 -ccopt -march=native -o <out> <src>"
   }
 }

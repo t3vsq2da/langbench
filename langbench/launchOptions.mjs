@@ -212,7 +212,7 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
     m: "normal",
     t: [ALL],
     l: [ALL],
-    ac: 5,
+    ac: 1, //there is almost no difference between attempts, both on isolated cores and on other cores.
     mt: null,
     ls: 1,
     ld: false,
