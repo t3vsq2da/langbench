@@ -1,10 +1,10 @@
-import { spawn } from "child_process";
+import { spawn as nodeSpawn } from "child_process";
 import { log, LBError, msgs, isEmpty } from "./utils.mjs";
 import process from "process";
 import path from "path";
 
 //!! USE IT EXCLUSIVELY where the text is written as a literal - it does not depend on user input
-export const fromStr = str => {
+export const fromStr = (str) => {
   const words = [];
   let i = 0;
   let current = "";
@@ -62,7 +62,7 @@ const _exec = (cmd, args, pwd, silent) => {
   return new Promise((resolve, reject) => {
     if (!silent) log("c", "(", pwd, ")", [cmd, ...args].join(" "));
 
-    const child = spawn(cmd, args, {
+    const child = nodeSpawn(cmd, args, {
       stdio: ["pipe", "pipe", "pipe"],
       cwd: pwd,
     });
@@ -70,26 +70,59 @@ const _exec = (cmd, args, pwd, silent) => {
     let stdout = "";
     let stderr = "";
 
-    child.stdout.on("data", data => (stdout += data.toString()));
+    child.stdout.on("data", (data) => (stdout += data.toString()));
 
-    child.stderr.on("data", data => (stderr += data.toString()));
+    child.stderr.on("data", (data) => (stderr += data.toString()));
 
     child.on("error", reject);
 
-    child.on("close", code =>
+    child.on("close", (code) =>
       resolve(
         log("d", "cmd-result", {
           stdout: stdout.trim(),
           stderr: stderr.trim(),
           code,
-        })
-      )
+        }),
+      ),
     );
   });
 };
 
 export const exec = async (cmd, args, pwd, silent) => {
   return await _exec(...preprocessed(cmd, args, pwd, silent));
+};
+
+export const spawn = (cmd, args, pwd, viewDebug) => {
+  [cmd, args, pwd, viewDebug] = preprocessed(cmd, args, pwd, viewDebug);
+
+  if (!viewDebug) log("c", "(ss", pwd, ")[async]", [cmd, ...args].join(" "));
+
+  const child = nodeSpawn(cmd, args, {
+    stdio: ["pipe", "pipe", "pipe"],
+    cwd: pwd,
+  });
+
+  let stdout = "";
+  let stderr = "";
+
+  child.on("error", () => {
+    throw new LBError(msgs.utils.execCommandFail(cmd + " " + args.join(" ")));
+  });
+
+  child.stdout.on("data", (data) => (stdout += data.toString()));
+
+  child.stderr.on("data", (data) => (stderr += data.toString()));
+
+  child.on("close", (code) =>
+    log("d", "cmd-result", {
+      stdout: stdout.trim(),
+      stderr: stderr.trim(),
+      code,
+      pid: child.pid,
+    }),
+  );
+
+  return child.pid;
 };
 
 //use Cmd.stat(cmd, [input], "tmp");
@@ -109,8 +142,8 @@ export const stat = async (cmd, args, pwd, silent) => {
         cmd + " " + args.join(" "),
         stdout,
         stderrLines.join("\n"),
-        code
-      )
+        code,
+      ),
     );
 
   const lastLine = stderr.split("\n").at(-1);
@@ -122,8 +155,8 @@ export const stat = async (cmd, args, pwd, silent) => {
         cmd + " " + args.join(" "),
         stdout,
         stderrLines.join("\n"),
-        code
-      )
+        code,
+      ),
     );
 
   const [utime, stime, mem, cpu] = splittedRes;

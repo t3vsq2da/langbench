@@ -71,6 +71,6 @@
   "ocaml":{
     "req":["ocaml","ocamlopt"],
     "ext":"ml",
-    "build":"ocamlopt -inline 100 -unbox-closures -nodynlink -noassert -unsafe -ccopt -O3 -ccopt -march=native -o <out> <src>"
+    "build":"ocamlopt -thread str.cmxa unix.cmxa threads.cmxa -inline 100 -unbox-closures -nodynlink -noassert -unsafe -ccopt -O3 -ccopt -march=native -o <out> <src>"
   }
 }

@@ -105,15 +105,18 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
         char.repeat(Math.floor(indent)) + str + char.repeat(Math.ceil(indent))
       );
     };
+
     const formatRow = (row) => {
       return row.map((ceil, i) => pad(ceil, ceilWidths[i], " ")).join(" | ");
     };
+
     const res = [];
     res.push(pad(title, rowWidth, "="));
     res.push(formatRow(headers));
     res.push("-".repeat(rowWidth));
     res.push(...rows.map(formatRow));
     res.push("=".repeat(rowWidth));
+
     return res.join("\n");
   },
 };

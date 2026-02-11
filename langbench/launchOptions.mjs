@@ -93,12 +93,12 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
 
     await checkReq("LangBench", "taskset");
 
-    for (let [lName, lang] of Object.entries(this.langs)) {
+    for (let [lName, lang] of Object.entries(this.langs))
       if (lang.req)
         if (lang.req.length)
           for (let req of lang.req) await checkReq(lName, req);
         else await checkReq(lName, lang.req);
-    }
+
     if (rMsgs.length) throw new LBError(rMsgs.join("\n"));
   };
 
@@ -227,4 +227,18 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
 
 export default LaunchOptions;
 
-const helpMsg = (langs, tests) => ``;
+const helpMsg = `available options:
+  '-t' - to specify the names of the tests to be run
+  '-l' - to specify the names of the langs to be run
+  '-m' - mode
+    '-m fast' - some of the tests or programming languages may be disabled
+    '-m detailed' - for a more detailed test
+  '-ac' - attempts count
+  '-mt' - maximum number of threads
+  '-ls' - log stages
+  '-lc' - log (sys)commands
+  '-la' - log attempts
+  '-li' - log of results for each of the tests
+  '-llo' - log launch options
+  '-srj' - save result json
+  '-srt' - save result table`;

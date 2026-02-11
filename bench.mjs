@@ -20,15 +20,15 @@ async function main(langsCfg, testsCfg) {
   log("s", "init tests&langs");
 
   const langs = Object.entries(langsCfg).map(
-    ([name, data]) => new Lang(name, data)
+    ([name, data]) => new Lang(name, data),
   );
 
   const tests = Object.entries(testsCfg).map(
-    ([name, data]) => new Test(name, data)
+    ([name, data]) => new Test(name, data),
   );
 
   log("s", "check langs src");
-  tests.forEach(({ src }) => langs.forEach(lang => lang.findSrc(src)));
+  tests.forEach(({ src }) => langs.forEach((lang) => lang.findSrc(src)));
 
   log("d", "langs", langs);
   log("d", "tests", tests);
@@ -40,7 +40,7 @@ async function main(langsCfg, testsCfg) {
 
   for (let i = 0; i < tests.length; ++i) {
     const test = tests[i];
-    log("s", `start test ${test.name}`);
+    log("s", `start test '${test.name}'`);
 
     const logCbStage = (tName, lName, langI) =>
       log(
@@ -51,8 +51,8 @@ async function main(langsCfg, testsCfg) {
           tName,
           lName,
           i,
-          langI
-        )
+          langI,
+        ),
       );
     const lBenchEntries = await test.benchLangs(langs, logCbStage);
 
@@ -65,7 +65,7 @@ async function main(langsCfg, testsCfg) {
   log(
     "s",
     "the benchmark was completed in " +
-      format.time((Date.now() - startBenchTime) / 1000)
+      format.time((Date.now() - startBenchTime) / 1000),
   );
 }
 
@@ -106,12 +106,12 @@ const outsFiles = {
     if (launchOptions.srt) {
       tableFileText = "";
       tableFileAppned = launchOptions.srt
-        ? txt => (tableFileText += (txt != null ? txt : "") + "\n")
+        ? (txt) => (tableFileText += (txt != null ? txt : "") + "\n")
         : null;
     }
     if (launchOptions.srj) jsonFileObj = { total: null, entries: [] };
   },
-  writeLo: lo => {
+  writeLo: (lo) => {
     tableFileAppned?.("launch options:\n" + lo + "\n");
     if (jsonFileObj && launchOptions.llo) jsonFileObj["launch options"] = lo;
   },

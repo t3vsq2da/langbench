@@ -28,10 +28,15 @@ export default class Test {
       else cmd += " " + input;
 
     for (let i = 0; i < Test.attempts; ++i) {
+      let beforePid;
+
+      if (this.before) beforePid = Cmd.spawn(...fromStr(this.before));
       const { stdout, stat, code, stderr } = await Cmd.stat(
         ...fromStr(cmd),
-        "tmp"
+        "tmp",
       );
+
+      if (beforePid) process.kill(log("d", "kill", beforePid), "SIGKILL");
       this.logAttempt(input, stat, i);
       if (
         expectedOut != null &&
@@ -44,8 +49,8 @@ export default class Test {
             code,
             expectedOut,
             stdout,
-            stderr
-          )
+            stderr,
+          ),
         );
 
       if (best == null || Test.compareAttempts(stat, best) == -1) best = stat;
@@ -54,7 +59,7 @@ export default class Test {
     return best;
   };
 
-  bench = async cmd => {
+  bench = async (cmd) => {
     const stats = {};
 
     if (this.asserts && Object.keys(this.asserts).length) {
@@ -85,8 +90,8 @@ export default class Test {
             lang.name,
             input,
             stat,
-            attemptI
-          )
+            attemptI,
+          ),
         );
       let buildStat;
       if (lang.build) buildStat = await lang.buildStat(appName);
@@ -108,8 +113,8 @@ export default class Test {
           benchResult,
           this.name,
           lang.name,
-          buildStat
-        )
+          buildStat,
+        ),
       );
 
       fs.rmSync(lang.out ?? appName, { force: true });

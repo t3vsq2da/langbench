@@ -51,5 +51,17 @@
       "<threads> 6666666":null,
       "<threads> 33333333":null
     }
+  },
+  "server":{
+    "src":"server",
+    "multi-threads":true,
+    "//":"default port 8080 for programms",
+    "before":"oha -c 222 -z 6666s -m POST -H \"Content-Type: application/json\" -d '{\"data\":10}' http://localhost:8080/",
+    "asserts":{
+      "11":110,
+      "666":6660,
+      "999":9990,
+      "3666":36660
+    }
   }
 }
