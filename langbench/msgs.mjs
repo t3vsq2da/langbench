@@ -7,7 +7,7 @@ const msgs = {
     incompatibleOptions: (opt1, opt2) =>
       `Options '${opt1}' and options '${opt2}' are not compatible`,
     noFlag: () => `a flag (option) must be specified before the values`,
-    undefinedFlag: flag => `unknown flag '${flag}'`,
+    undefinedFlag: (flag) => `unknown flag '${flag}'`,
     sysInfo: ({ cpu, disks, os }) => `\ncpu: '${cpu.model}' (${
       cpu.logicalCores
     } threads)
@@ -22,7 +22,7 @@ os: ${os.platform}(${os.release}) arch:${os.arch}`,
       cmd,
       stdout,
       stderr,
-      code
+      code,
     ) => `No zero code when running the command
 cmd:'${cmd}' code:'${code}'\
 ${stdout?.trim().length ? `\n[stdout-start]\n${stdout}\n[stdout-start]` : ""}\
@@ -33,7 +33,7 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
       cmd,
       stdout,
       stderr,
-      code
+      code,
     ) => `incorrect output when running the command
 cmd:'${cmd}' code:'${code}'\
 ${stdout?.trim().length ? `\n[stdout-start]\n${stdout}\n[stdout-start]` : ""}\
@@ -44,7 +44,7 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
       code,
       expected,
       stdout,
-      stderr
+      stderr,
     ) => `incorrect result when performing test '${testName}'
 cmd:'${cmd}' code:'${code}'
 [expected-stdout-start]\n${expected}\n[expected-stdout-end]
@@ -54,18 +54,18 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
   langs: {
     srcNoFound: (lang, folder, name) =>
       `src '${name}' in dir '${folder}' for language '${lang}' was not found.`,
-    specifyExt: lang =>
+    specifyExt: (lang) =>
       `the source file of language '${lang}' could not be identified. Specify the extension in the language configuration`,
     missedFieldLang: (lName, field) =>
       `missing field '${field}' in the programming language configuration '${lName}'`,
-    langNoRun: langName =>
+    langNoRun: (langName) =>
       `it is not possible to define a command to run in language '${langName}'`,
   },
   tests: {
     missedFieldTest: (tName, field) =>
       `missing field '${field}' in test configuration '${tName}'`,
     currentLang: (testsL, langsL, tName, lName, testI, langI) =>
-      `[test ${langI + 1}/${testsL} | lang ${
+      `[test ${testI + 1}/${testsL} | lang ${
         langI + 1
       }/${langsL}] "${tName}" (${lName})`,
     currentAttempt: (testName, attempsCount, langName, input, stat, attemptI) =>
@@ -75,11 +75,11 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
     currentAssert: (assertI, assertsL, input) =>
       `[ assert:${assertI + 1}/${assertsL} ] input:{${input}}`,
   },
-  benchEntires: e =>
+  benchEntires: (e) =>
     `t:${format.time(e.time)} m:${format.mem(e.mem)} cpu%:${e.cpu}`,
   table: (title, headers, rows) => {
-    headers = headers.map(h => h.toString().trim());
-    rows = rows.map(row => row.map(ceil => ceil.toString().trim()));
+    headers = headers.map((h) => h.toString().trim());
+    rows = rows.map((row) => row.map((ceil) => ceil.toString().trim()));
 
     let ceilWidths = [];
     const updateWidth = (str, index) => {
@@ -88,7 +88,7 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
       else ceilWidths[index] = str.length;
     };
 
-    rows.forEach(row => {
+    rows.forEach((row) => {
       row.forEach(updateWidth);
     });
     headers.forEach(updateWidth);
@@ -96,7 +96,7 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
     let rowWidth = Math.max(
       title.length + 2,
       headers.join("").length + (headers.length - 1) * 3,
-      ceilWidths.reduce((a, v) => a + v, 0) + (headers.length - 1) * 3
+      ceilWidths.reduce((a, v) => a + v, 0) + (headers.length - 1) * 3,
     );
 
     const pad = (str, width, char) => {
@@ -105,7 +105,7 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
         char.repeat(Math.floor(indent)) + str + char.repeat(Math.ceil(indent))
       );
     };
-    const formatRow = row => {
+    const formatRow = (row) => {
       return row.map((ceil, i) => pad(ceil, ceilWidths[i], " ")).join(" | ");
     };
     const res = [];
@@ -119,11 +119,11 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
 };
 
 export const format = {
-  time: t => {
+  time: (t) => {
     t = Number(t);
     return t > 100 ? (t / 60).toFixed(2) + "m" : t.toFixed(2) + "s";
   },
-  mem: m => {
+  mem: (m) => {
     m = Number(m);
     const prefixs = ["B", "KB", "MB", "GB", "TB"];
     let i = 0;
@@ -133,8 +133,8 @@ export const format = {
     }
     return Number.isInteger(m) ? m : m.toFixed(1) + prefixs[i];
   },
-  benchEntires: entries => {
-    const rows = entries.map(stat => [
+  benchEntires: (entries) => {
+    const rows = entries.map((stat) => [
       stat.lang,
       format.time(stat.time),
       format.mem(stat.mem),

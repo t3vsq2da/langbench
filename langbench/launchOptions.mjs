@@ -66,17 +66,17 @@ class LaunchOptions {
     this.m
   }
 langs:${Object.keys(this.langs)
-    .map(k => "'" + k + "'")
+    .map((k) => "'" + k + "'")
     .join(", ")}
 tests:${Object.keys(this.tests)
-    .map(k => "'" + k + "'")
+    .map((k) => "'" + k + "'")
     .join(", ")}
 logging:${this.ls ? " stages" : ""}${this.la ? " attempts" : ""}${
     this.li == 1
       ? " result-of-each-test"
       : this.li == 2
-      ? " result-of-each-assert"
-      : ""
+        ? " result-of-each-assert"
+        : ""
   }${this.lc ? " commands" : ""}${this.ld ? " debug" : ""}
 save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
   `;
@@ -106,28 +106,28 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
     const checks = {
       t: pipe(
         //tests
-        map(v => v.toString().trim()),
-        every(isSet, pipe(isEmpty, opposite))
+        map((v) => v.toString().trim()),
+        every(isSet, pipe(isEmpty, opposite)),
       ),
       l: pipe(
         //langs
-        map(v => v.toString().trim()),
-        every(isSet, pipe(isEmpty, opposite))
+        map((v) => v.toString().trim()),
+        every(isSet, pipe(isEmpty, opposite)),
       ),
-      ac: every(isType("number"), Number.isInteger, n => n > 0), //attemps count
-      m: every(isType("string"), m =>
-        ["fast", "normal", "detailed"].includes(m)
+      ac: every(isType("number"), Number.isInteger, (n) => n > 0), //attemps count
+      m: every(isType("string"), (m) =>
+        ["fast", "normal", "detailed"].includes(m),
       ), //mode
       mt: every(
         isType("number"),
         Number.isInteger,
-        n => n >= 1 && n < this.sysInfo.cpu.threads
+        (n) => n >= 1 && n < this.sysInfo.cpu.threads,
       ), //max count threads for multithrteads tests
-      ls: v => [0, 1, 2].includes(v), //log stages
+      ls: (v) => [0, 1, 2].includes(v), //log stages
       ld: isType("boolean"), //log debug
       lc: isType("boolean"), //log cmds
       la: isType("boolean"), //log attempts
-      li: v => [0, 1, 2].includes(v), //log individual tests
+      li: (v) => [0, 1, 2].includes(v), //log individual tests
       llo: isType("boolean"), //log launchOptions
       srj: isType("boolean"), //save result json
       srt: isType("boolean"), //save result table
@@ -150,14 +150,14 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
     raw = excludeDisabled(raw, this.m);
     if (enabled[0] == ALL) return raw;
     else {
-      const undefinedName = enabled.find(name => !(name in raw));
+      const undefinedName = enabled.find((name) => !(name in raw));
       if (undefinedName != null)
         throw new LBError(
-          msgs.launchOptions.undefinedName(fileName, undefinedName)
+          msgs.launchOptions.undefinedName(fileName, undefinedName),
         );
       else
         return Object.fromEntries(
-          Object.entries(raw).filter(([name]) => enabled.includes(name))
+          Object.entries(raw).filter(([name]) => enabled.includes(name)),
         );
     }
   };
@@ -180,20 +180,20 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
         "lsblk",
         ["-d", "-o", "NAME,MODEL,SERIAL,SIZE,TRAN", "--json"],
         "root",
-        1
+        1,
       );
       return (
         JSON.parse(stdout)
           //discarding removable media and non-real disks
           .blockdevices.filter(
-            d =>
+            (d) =>
               d.model &&
               d.name &&
               d.serial &&
               !/^(loop|ram|zram|dm-|md|sr|fd)/.test(d.name) &&
-              fs.readFileSync(`/sys/block/${d.name}/removable`, "utf8") !== "1"
+              fs.readFileSync(`/sys/block/${d.name}/removable`, "utf8") !== "1",
           )
-          .map(d => d.model)
+          .map((d) => d.model)
       );
     };
 
@@ -227,4 +227,4 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
 
 export default LaunchOptions;
 
-const helpMsg = `help`;
+const helpMsg = (langs, tests) => ``;

@@ -16,11 +16,11 @@
     "out-file":"<test-src>.class",
     "run":"java -XX:+OptimizeFill <app>"
   },
-  "!!elixir":{
+  "++elixir":{
     "//":"It's really very slow",
     "req":["elixir","elixirc"],
     "build":"elixirc --no-debug-info <src> -o tmp",
-    "//":"'out' is used ONLY for measuring the file size.",
+    "//":"'out' is used ONLY for measuring the file size",
     "out-file":"Elixir.Main.beam",
     "run":"elixir --erl \"+S <threads-count> +A <threads-count> +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
   },
@@ -69,6 +69,7 @@
     "build":"go build -ldflags=\"-s -w\" -trimpath -o <out> <src>"
   },
   "ocaml":{
+    "req":["ocaml","ocamlopt"],
     "ext":"ml",
     "build":"ocamlopt -inline 100 -unbox-closures -nodynlink -noassert -unsafe -ccopt -O3 -ccopt -march=native -o <out> <src>"
   }
