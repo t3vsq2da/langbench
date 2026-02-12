@@ -1,19 +1,12 @@
 #!/usr/bin/env node
-import {
-  LBError,
-  Cmd,
-  isEmpty,
-  setLog,
-  log,
-  Entries,
-} from "./langbench/utils.mjs";
-import msgs, { format } from "./langbench/msgs.mjs";
-import LaunchOptions from "./langbench/launchOptions.mjs";
+import { LBError, Cmd, isEmpty, setLog, log, Entries } from "./bench/utils.mjs";
+import msgs, { format } from "./bench/msgs.mjs";
+import LaunchOptions from "./bench/launchOptions.mjs";
 import fs from "node:fs";
-import Test from "./langbench/test.mjs";
-import Lang from "./langbench/lang.mjs";
+import Test from "./bench/test.mjs";
+import Lang from "./bench/lang.mjs";
 import process from "process";
-import { fromStr } from "./langbench/cmd.mjs";
+import { fromStr } from "./bench/cmd.mjs";
 
 let launchOptions;
 
