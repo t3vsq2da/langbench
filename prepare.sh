@@ -11,7 +11,7 @@ run_sudo() {
 
 # 1. Установка CPU governor в 'performance'
 if command -v cpupower >/dev/null 2>&1; then
-  echo "etting CPU governor to 'performance'..."
+  echo "setting CPU governor to 'performance'..."
   run_sudo cpupower frequency-set -g performance >/dev/null
   echo "done"
 else

@@ -25,7 +25,7 @@ sudo pacman -S time gcc clang ghc jdk-openjdk elixir rust python pypy3 perl node
 
 # Использование
 
-Установка:
+## Установка
 
 ```bash
 git clone https://github.com/t3vsq2da/langbench
