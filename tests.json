@@ -24,10 +24,10 @@
     }
   },
   "fileio":{
+    "src":"fileio",
     "//":"creates a lot of files in the tmp directory, be careful",
     "//":"creates a lot of files, fills them with units, and then counts the number of 64Kb chunks",
     "//":"the first argument is the number of files, the second is the number of units in each file",
-    "src":"fileio",
     "asserts":{
       "1000 300000":4577,
       "2000 400000":12207,
