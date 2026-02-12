@@ -1,11 +1,19 @@
 #!/usr/bin/env node
-import { LBError, isEmpty, setLog, log, Entries } from "./langbench/utils.mjs";
+import {
+  LBError,
+  Cmd,
+  isEmpty,
+  setLog,
+  log,
+  Entries,
+} from "./langbench/utils.mjs";
 import msgs, { format } from "./langbench/msgs.mjs";
 import LaunchOptions from "./langbench/launchOptions.mjs";
 import fs from "node:fs";
 import Test from "./langbench/test.mjs";
 import Lang from "./langbench/lang.mjs";
 import process from "process";
+import { fromStr } from "./langbench/cmd.mjs";
 
 let launchOptions;
 
@@ -29,6 +37,9 @@ async function main(langsCfg, testsCfg) {
 
   log("s", "check langs src");
   tests.forEach(({ src }) => langs.forEach((lang) => lang.findSrc(src)));
+
+  log("s", "run langs setup cmds");
+  for (const l of langs) if (l.setup) await Cmd.exec(...fromStr(l.setup));
 
   log("d", "langs", langs);
   log("d", "tests", tests);
@@ -62,6 +73,7 @@ async function main(langsCfg, testsCfg) {
 
   Entries.outEntriesTotal(benchEntries);
 
+  log("");
   log(
     "s",
     "the benchmark was completed in " +

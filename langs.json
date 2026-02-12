@@ -25,8 +25,9 @@
     "run":"elixir --erl \"+S <threads-count> +A <threads-count> +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
   },
   "haskell":{
-    "req":["stack"],
-    "build":"stack ghc -- -Wno-x-partial -threaded -rtsopts -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
+    "req":["cabal","ghc"],
+    "build":"ghc -Wno-x-partial -threaded -rtsopts -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
+    "setup":"bash -c 'cabal update ; cabal install --lib network directory'",
     "run":"./<app> <input> +RTS -N8",
     "ext":"hs"
   },
@@ -45,8 +46,8 @@
     "req":["pypy3"],
     "run":"pypy3 -X no_gc_thread -OO -B -E -u <app>"
   },
-  "++perl":{
-    "//":"It's slow",
+  "!!perl":{
+    "//":"It's SLOW",
     "req":["perl"]
   },
   "nodejs":{

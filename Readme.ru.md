@@ -20,8 +20,7 @@
 Arch:
 
 ```bash
-sudo pacman -S time gcc clang jdk-openjdk elixir rust python pypy3 perl nodejs deno nim go ocaml
-yay -S stack
+sudo pacman -S time gcc clang ghc jdk-openjdk elixir rust python pypy3 perl nodejs deno nim go ocaml cabal-install
 ```
 
 # Использование
@@ -35,12 +34,12 @@ cd langbench
 
 ## Рекомендуется запустить его перед началом теста prepare.sh
 
+Данный скрипт, настроит систему так, чтобы замеры были более точные и менее случайные. Требует утилиту `cpupower`.
+
 ```bash
 chmod +x ./prepare.sh
 ./prepare.sh
 ```
-
-Данный скрипт, настроит систему так, чтобы замеры были более точные и менее случайные
 
 ## Запуск тестов
 

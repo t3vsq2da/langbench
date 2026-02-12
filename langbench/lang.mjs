@@ -1,6 +1,7 @@
 import { LBError, excludeDisabled, msgs, Cmd } from "./utils.mjs";
 import path from "node:path";
 import fs from "node:fs";
+import { fromStr } from "./cmd.mjs";
 
 export default class Lang {
   constructor(name, data) {
@@ -13,17 +14,17 @@ export default class Lang {
     } else this.run ??= name + " <app>";
   }
 
-  findSrc = src => {
+  findSrc = (src) => {
     if (!fs.existsSync(this.folder))
       throw new LBError(msgs.langs.srcNoFound(this.name, this.folder, src));
 
-    let matches = fs.readdirSync(this.folder).filter(e => e.startsWith(src));
+    let matches = fs.readdirSync(this.folder).filter((e) => e.startsWith(src));
     if (matches.length === 0)
       throw new LBError(msgs.langs.srcNoFound(this.name, this.folder, src));
     else if (this.ext != null) {
       const fullName = src + "." + this.ext;
 
-      if (matches.find(f => f === fullName) != null)
+      if (matches.find((f) => f === fullName) != null)
         return path.join(this.folder, fullName);
       else
         throw new LBError(msgs.langs.srcNoFound(this.name, this.folder, src));
@@ -32,16 +33,16 @@ export default class Lang {
   };
 
   //relative tmp folder
-  getRunCmd = appName => {
+  getRunCmd = (appName) => {
     if (this.build) return this.run.replaceAll("<app>", appName);
     else
       return this.run.replaceAll(
         "<app>",
-        path.join("../", this.findSrc(appName))
+        path.join("../", this.findSrc(appName)),
       );
   };
 
-  buildStat = async testSrc => {
+  buildStat = async (testSrc) => {
     const src = this.findSrc(testSrc);
     const outApp = path.join("tmp", testSrc);
 
@@ -49,12 +50,12 @@ export default class Lang {
       stat: { time },
     } = await Cmd.stat(
       ...Cmd.fromStr(
-        this.build.replaceAll("<src>", src).replaceAll("<out>", outApp)
-      )
+        this.build.replaceAll("<src>", src).replaceAll("<out>", outApp),
+      ),
     );
     const outFile = path.join(
       "./tmp",
-      this["out-file"].replaceAll("<test-src>", testSrc)
+      this["out-file"].replaceAll("<test-src>", testSrc),
     );
     const size = fs.statSync(outFile).size;
 

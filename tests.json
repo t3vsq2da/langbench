@@ -35,33 +35,36 @@
       "!!2000 1111111":33908
     }
   },
+  "parallel-monte":{
+    "src":"parallelMonte",
+    "multiThreads":true,
+    "asserts":{
+      "<threads> 1222222":null,
+      "<threads> 6666666":null,
+      "<threads> 11111111":null,
+      "++<threads> 33333333":null,
+      "!!<threads> 44444444":null
+    }
+  },
+  "server":{
+    "src":"server",
+    "multi-threads":true,
+    "//":"parallel http server that processes post requests",
+    "//":"need port 8080",
+    "before":"oha -c 222 -z 6666s -m POST -H \"Content-Type: application/json\" -d '{\"data\":10}' http://localhost:8080/",
+    "asserts":{
+      "11":110,
+      "666":6660,
+      "9999":99990,
+      "22222":222220
+    }
+  },
   "--sleep":{
     "//":"just checking the time measurement",
     "src":"sleep",
     "asserts":{
       "50":null,
       "100":null
-    }
-  },
-  "parallel-monte":{
-    "src":"parallelMonte",
-    "multiThreads":true,
-    "asserts":{
-      "<threads> 1000000":null,
-      "<threads> 6666666":null,
-      "<threads> 33333333":null
-    }
-  },
-  "server":{
-    "src":"server",
-    "multi-threads":true,
-    "//":"default port 8080 for programms",
-    "before":"oha -c 222 -z 6666s -m POST -H \"Content-Type: application/json\" -d '{\"data\":10}' http://localhost:8080/",
-    "asserts":{
-      "11":110,
-      "666":6660,
-      "999":9990,
-      "3666":36660
     }
   }
 }
