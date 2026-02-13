@@ -54,7 +54,9 @@ class LaunchOptions {
   init = async () => {
     await this.loadSysInfo();
     if (this.rawOptions.mt == null)
-      this.rawOptions.mt = Math.max(1, this.sysInfo.cpu.threads / 2);
+      this.rawOptions.mt = Math.floor(
+        Math.max(1, this.sysInfo.cpu.threads / 2),
+      );
     this.validation();
     for (const flag in this.rawOptions) this[flag] = this.rawOptions[flag];
     delete this.rawOptions;

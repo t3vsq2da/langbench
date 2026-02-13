@@ -54,6 +54,9 @@ export default class Test {
         );
 
       if (best == null || Test.compareAttempts(stat, best) == -1) best = stat;
+
+      //pause
+      await new Promise((r) => setTimeout(r, 44));
     }
 
     return best;

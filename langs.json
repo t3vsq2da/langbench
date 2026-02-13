@@ -27,6 +27,7 @@
   "haskell":{
     "req":["cabal","ghc"],
     "build":"ghc -package bytestring -package network -package directory -dynamic -Wno-x-partial -threaded -rtsopts -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
+    "setup":"bash -c 'cabal update ; cabal install --lib network bytestring directory'",
     "run":"./<app> <input> +RTS -N8",
     "ext":"hs"
   },
