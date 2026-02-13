@@ -1,8 +1,8 @@
 launch options:
-attempt-count:1 max-threads:8 mode:detailed
+attempt-count:4 max-threads:8 mode:detailed
 langs:'ocaml'
 tests:'parallel-monte'
-logging: stages result-of-each-assert commands
+logging: stages attempts result-of-each-assert commands
 save results: tables
   
 
@@ -10,41 +10,41 @@ save results: tables
 ===============parallel-monte[8 1222222]================
 lang  | time  |  mem   | cpu%  | build time | build size
 --------------------------------------------------------
-ocaml | 0.01s | 21.2KB | 250.0 |   0.12s    |  1682.3KB 
+ocaml | 0.02s | 18.6KB | 254.0 |   0.09s    |  1682.3KB 
 ========================================================
 
 ===============parallel-monte[8 6666666]================
 lang  | time  |  mem   | cpu%  | build time | build size
 --------------------------------------------------------
-ocaml | 0.16s | 23.0KB | 514.0 |   0.12s    |  1682.3KB 
+ocaml | 0.14s | 23.4KB | 356.0 |   0.09s    |  1682.3KB 
 ========================================================
 
 ===============parallel-monte[8 11111111]===============
 lang  | time  |  mem   | cpu%  | build time | build size
 --------------------------------------------------------
-ocaml | 0.22s | 23.2KB | 515.0 |   0.12s    |  1682.3KB 
+ocaml | 0.20s | 23.3KB | 400.0 |   0.09s    |  1682.3KB 
 ========================================================
 
 ===============parallel-monte[8 33333333]===============
 lang  | time  |  mem   | cpu%  | build time | build size
 --------------------------------------------------------
-ocaml | 0.55s | 23.2KB | 645.0 |   0.12s    |  1682.3KB 
+ocaml | 0.52s | 23.2KB | 505.0 |   0.09s    |  1682.3KB 
 ========================================================
 
 ===============parallel-monte[8 44444444]===============
 lang  | time  |  mem   | cpu%  | build time | build size
 --------------------------------------------------------
-ocaml | 0.68s | 23.2KB | 575.0 |   0.12s    |  1682.3KB 
+ocaml | 0.66s | 23.1KB | 526.0 |   0.09s    |  1682.3KB 
 ========================================================
 
 =====================parallel-monte======================
 lang  | time  |   mem   | cpu%  | build time | build size
 ---------------------------------------------------------
-ocaml | 1.62s | 113.9KB | 499.8 |   0.60s    |   8.2MB   
+ocaml | 1.54s | 111.5KB | 408.2 |   0.45s    |   8.2MB   
 =========================================================
 
 ==========================total==========================
 lang  | time  |   mem   | cpu%  | build time | build size
 ---------------------------------------------------------
-ocaml | 1.62s | 113.9KB | 499.8 |   0.60s    |   8.2MB   
+ocaml | 1.54s | 111.5KB | 408.2 |   0.45s    |   8.2MB   
 =========================================================
