@@ -1,4 +1,7 @@
-sudo dnf install time 7zip gcc clang ghc java-latest-openjdk-devel elixir rust python3 pypy3 nodejs perl golang ocaml cargo cabal-install
+sudo dnf install time 7zip gcc clang ghc java-25-openjdk-devel elixir rust python3 pypy3 nodejs perl golang ocaml cargo cabal-install
+#java
+sudo alternatives --set javac /usr/lib/jvm/java-25-openjdk/bin/javac
+sudo alternatives --set java /usr/lib/jvm/java-25-openjdk/bin/java
 #deno
 curl -OSL https://github.com/denoland/deno/releases/download/v2.6.9/deno-x86_64-unknown-linux-gnu.zip
 7z e deno-x86_64-unknown-linux-gnu.zip
