@@ -1,4 +1,4 @@
-sudo apt install 7zip curl time gcc clang ghc openjdk-25-jdk elixir rustc python3 pypy3 perl nodejs golang-go ocaml
+sudo apt install 7zip curl time gcc clang ghc openjdk-25-jdk elixir rustc python3 pypy3 perl nodejs golang-go ocaml cabal-install
 #deno
 curl -OSL https://github.com/denoland/deno/releases/download/v2.6.9/deno-x86_64-unknown-linux-gnu.zip
 7z e deno-x86_64-unknown-linux-gnu.zip
