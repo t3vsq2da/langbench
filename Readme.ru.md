@@ -27,12 +27,19 @@ Debian|Ubuntu:
 
 ```bash
 sudo apt install 7zip curl time gcc clang ghc openjdk-25-jdk elixir rustc python3 pypy3 perl nodejs golang-go ocaml oha
+#deno
 curl -OSL https://github.com/denoland/deno/releases/download/v2.6.9/deno-x86_64-unknown-linux-gnu.zip
 7z e deno-x86_64-unknown-linux-gnu.zip
 sudo cp deno /usr/bin
+#nim
 curl -O https://nim-lang.org/download/nim-2.2.6-linux_x64.tar.xz
 tar -xvf ./nim-2.2.6-linux_x64.tar.xz
 sudo ./install.sh
+#oha
+echo "deb [signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packages.azlux.fr/debian/ stable main" | sudo tee /etc/apt/sources.list.d/azlux.list
+sudo wget -O /usr/share/keyrings/azlux-archive-keyring.gpg https://azlux.fr/repo.gpg
+apt update
+apt install oha
 ```
 
 # Использование
@@ -95,7 +102,7 @@ chmod +x bench.mjs
 | `-ac`         | `attempts-count`     | Целое число ≥ 1                   | Количество повторных запусков каждого теста. Итоговый результат — лучшая (наименее ресурсоёмкая) попытка.                                                                                 |
 | `-m`          | `mode`               | `normal`,`fast`,`detailed`        | При `fast` отключает дополнительный тесты(начинаются с `++`), при `detailed` включает дополнительные тесты(начинаются с `!!`)                                                             |
 | `-mt`         | `max-threads`        | cpu log cores > Целое числа ≥ 1   | Задает кол-во потоков, для выполнения мультипоточных тестов                                                                                                                               |
-| `-ls`         | `log-stage`          | `0`,`1`,`2`                       | Выводить ли информацию о текущем этапе выполнения.                                                                                                                                        |
+| `-ls`         | `log-stage`          | `0`,`1`,`2`                       | Выводить ли информацию о текущем этапе выполнения. При значение `2` информация более подробная.                                                                                           |
 | `-lc`         | `log-commands`       | `true` / `false`                  | Логировать все выполняемые системные команды.                                                                                                                                             |
 | `-la`         | `log-attempts`       | `true` / `false`                  | Показывать подробности по каждой попытке измерения.                                                                                                                                       |
 | `-li`         | `log-individual`     | `0`, `1`, `2`                     | Уровень детализации по отдельным тестам:<br>• `0` — только результат всех тестов<br>• `1` — результаты для каждого из тестов<br>• `2` — более подробная информация для каждого из тестов. |
@@ -121,7 +128,8 @@ chmod +x bench.mjs
 
 > Если указано поле `build`, но не указано `run`, то после компиляции программа будет запускаться **напрямую как исполняемый файл** (`./<out>`).  
 > Если язык не требует компиляции (например, Python), достаточно указать только `run`.
-> Если не задан `build` и не задан `run`, в качестве команды запуска будет использоваться `<lang-name> ./<app>`
+> Если не задан `build` и не задан `run`, в качестве команды запуска будет использоваться `<lang-name> ./<app>`.
+> Все команды выполняются вне оболочки, а значит `|` (pipe), `>>` (append) и прочие возможности оболочки не доступны.
 
 ## Файл `tests.json` — описание тестов
 
