@@ -71,7 +71,7 @@ export default class Test {
         const input = assertsKeys[i].replaceAll("<threads>", Test.maxThreads);
 
         if (Test.onLogAsserts)
-          log("s", msgs.currentAssert(i, assertsKeys.length, input));
+          log("s", msgs.tests.currentAssert(i, assertsKeys.length, input));
 
         stats[input] = await this.bestStat(cmd, input, this.asserts[input]);
       }

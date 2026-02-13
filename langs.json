@@ -45,7 +45,7 @@
     "req":["pypy3"],
     "run":"pypy3 -X no_gc_thread -OO -B -E -u <app>"
   },
-  "!!perl":{
+  "--perl":{
     "//":"It's SLOW",
     "req":["perl"]
   },
@@ -54,11 +54,11 @@
     "req":["node"],
     "run":"node --no-concurrent-sweeping --predictable --max-old-space-size=4096 <app>"
   },
-  "!!denojs":{
-    "//":"something like node",
+  "--denojs":{
+    "//":"Slightly faster than nodejs, but there is no implementation for server.mjs because the cluster module is not implemented in deno :), and the implementation via worker threads is 5 times slower than cluster",
     "folder":"js",
     "req":["deno"],
-    "build":"deno compile --unstable --quiet --allow-sys --allow-read --allow-write --output <out> <src>"
+    "build":"deno compile --unstable --quiet --allow-net --allow-sys --allow-read --allow-write --output <out> <src>"
   },
   "nim":{
     "req":["nim"],

@@ -23,17 +23,9 @@ var (
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 
 	var data RequestData
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
-	}
+	json.NewDecoder(r.Body).Decode(&data)
 
 	// Атомарно увеличиваем сумму и счетчик
 	atomic.AddInt64(&totalSum, int64(data.Data))
@@ -53,16 +45,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: ./server <n>")
-		os.Exit(1)
-	}
 
 	parsedN, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		fmt.Printf("Invalid number: %v\n", err)
-		os.Exit(1)
-	}
 	n = int32(parsedN)
 
 	// Устанавливаем обработчик
@@ -72,7 +56,6 @@ func main() {
 	
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
-		fmt.Printf("Server error: %v\n", err)
 		os.Exit(1)
 	}
 }

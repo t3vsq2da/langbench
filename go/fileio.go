@@ -76,11 +76,6 @@ func itoa(n int) string {
 		return "0"
 	}
 
-	negative := n < 0
-	if negative {
-		n = -n
-	}
-
 	var digits [20]byte // достаточно для int64 (19 цифр + знак)
 	i := len(digits)
 
@@ -88,11 +83,6 @@ func itoa(n int) string {
 		i--
 		digits[i] = byte('0' + n%10)
 		n /= 10
-	}
-
-	if negative {
-		i--
-		digits[i] = '-'
 	}
 
 	return string(digits[i:])
