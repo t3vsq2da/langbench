@@ -8,7 +8,9 @@ rm ./deno
 #nim
 curl -O https://nim-lang.org/download/nim-2.2.6-linux_x64.tar.xz
 tar -xvf ./nim-2.2.6-linux_x64.tar.xz
-sudo ./nim-2.2.6/install.sh
+cd ./nim-2.2.6
+sudo ./install.sh /usr/bin
+cd ../
 rm ./nim-2.2.6-linux_x64.tar.xz
 rm -fdr ./nim-2.2.6
 #oha
