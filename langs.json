@@ -58,7 +58,7 @@
     "//":"something like node",
     "folder":"js",
     "req":["deno"],
-    "build":"deno compile --unstable --quiet --allow-read --allow-write --output <out> <src>"
+    "build":"deno compile --unstable --quiet --allow-sys --allow-read --allow-write --output <out> <src>"
   },
   "nim":{
     "req":["nim"],
