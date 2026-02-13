@@ -26,9 +26,8 @@
   },
   "haskell":{
     "req":["cabal","ghc"],
-    "build":"ghc -package bytestring -package network -package directory -dynamic -Wno-x-partial -threaded -rtsopts -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
-    "setup":"bash -c 'cabal update ; cabal install --lib network directory'",
-    "run":"./<app> <input> +RTS -N8",
+    "build":"ghc -package network -dynamic -Wno-x-partial -threaded -rtsopts -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
+    "run":"./<app> <input> +RTS -N<threads-count>",
     "ext":"hs"
   },
   "rust":{

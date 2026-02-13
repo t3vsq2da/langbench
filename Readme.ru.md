@@ -15,31 +15,27 @@
 
 ## Зависимости языков
 
-Для каждого из языков программирования есть свои зависимости, при запуске будут выведены не достающие. Для установки сразу всех зависимостей используйте команды ниже:
+Для каждого из языков программирования есть свои зависимости, при запуске будут выведены не достающие.
 
-Arch:
+Для установки сразу всех зависимостей используйте:
+
+для Arch
 
 ```bash
-sudo pacman -S time gcc clang ghc jdk-openjdk elixir rust python pypy3 perl nodejs deno nim go ocaml cabal-install oha
+bash ./setups/arch.sh
 ```
 
-Debian|Ubuntu:
+для Debian и Ubuntu
 
 ```bash
-sudo apt install 7zip curl time gcc clang ghc openjdk-25-jdk elixir rustc python3 pypy3 perl nodejs golang-go ocaml oha
-#deno
-curl -OSL https://github.com/denoland/deno/releases/download/v2.6.9/deno-x86_64-unknown-linux-gnu.zip
-7z e deno-x86_64-unknown-linux-gnu.zip
-sudo cp deno /usr/bin
-#nim
-curl -O https://nim-lang.org/download/nim-2.2.6-linux_x64.tar.xz
-tar -xvf ./nim-2.2.6-linux_x64.tar.xz
-sudo ./install.sh
-#oha
-echo "deb [signed-by=/usr/share/keyrings/azlux-archive-keyring.gpg] http://packages.azlux.fr/debian/ stable main" | sudo tee /etc/apt/sources.list.d/azlux.list
-sudo wget -O /usr/share/keyrings/azlux-archive-keyring.gpg https://azlux.fr/repo.gpg
-apt update
-apt install oha
+bash ./setups/debian-ubuntu.sh
+```
+
+Если вы устанавливаете зависимости самостоятельно, не используя скрипты из ./setups/, то для haskell/server.hs необходимо выполнить:
+
+```bash
+cabal update
+cabal install --lib network
 ```
 
 # Использование
@@ -124,7 +120,6 @@ chmod +x bench.mjs
 - **`run`** _(необязательно)_ — команда для запуска программы. Может содержать `<app>`, в качестве которого будет подставлен файл приложения(если есть `build` то `<app>` = `<out>`, иначе `<app>` = путь до исходного файла). `<threads-count>` будет заменено на кол-во доступных для теста ядер(их несколько если тест имеет опцию `multiThreads`)
 - **`ext`** _(необязательно)_ — расширение исходных файлов (например, `"cpp"`, `"rs"`, `"exs"`).
 - **`out-file`** _(необязательно)_ — путь выходного файла относительно директории `tmp`, **используется только для измерения его размера**. Нужно, когда имя результата нельзя определить автоматически (например, у Elixir нет единого бинарника). Может содержать `<test-src>` за место которого подставится поле `src` из теста (используется, например, для Java).
-- **`setup`** _(необязательно)_ - команда которая будет выполнена при старте скрипта bench.mjs.
 
 > Если указано поле `build`, но не указано `run`, то после компиляции программа будет запускаться **напрямую как исполняемый файл** (`./<out>`).  
 > Если язык не требует компиляции (например, Python), достаточно указать только `run`.
