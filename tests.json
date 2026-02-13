@@ -25,9 +25,9 @@
   },
   "fileio":{
     "src":"fileio",
-    "//":"creates a lot of files in the tmp directory, be careful",
-    "//":"creates a lot of files, fills them with units, and then counts the number of 64Kb chunks",
-    "//":"the first argument is the number of files, the second is the number of units in each file",
+    "//":"Сreates a lot of files in the tmp directory, be careful",
+    "//":"Сreates a lot of files, fills them with units, and then counts the number of 64Kb chunks",
+    "//":"The first argument is the number of files, the second is the number of units in each file",
     "asserts":{
       "1000 300000":4577,
       "2000 400000":12207,
@@ -49,14 +49,15 @@
   "server":{
     "src":"server",
     "multi-threads":true,
-    "//":"parallel http server that processes post requests",
-    "//":"need port 8080",
+    "//":"Parallel http server that processes post requests",
+    "//":"Need port 8080",
     "before":"oha -c 222 -z 6666s -m POST -H \"Content-Type: application/json\" -d '{\"data\":10}' http://localhost:8080/",
     "asserts":{
-      "11":110,
-      "666":6660,
+      "111":1110,
+      "876":8760,
       "9999":99990,
-      "22222":222220
+      "++22222":222220,
+      "!!33333":333330
     }
   },
   "--sleep":{

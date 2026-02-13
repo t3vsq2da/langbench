@@ -25,7 +25,7 @@
     "run":"elixir --erl \"+S <threads-count> +A <threads-count> +sbt u +sub true -smp enable\" -e 'Main.main()' -- "
   },
   "haskell":{
-    "req":["cabal","ghc"],
+    "req":["ghc"],
     "build":"ghc -package bytestring -package network -dynamic -Wno-x-partial -threaded -rtsopts -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
     "run":"./<app> <input> +RTS -N<threads-count>",
     "ext":"hs"
