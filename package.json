@@ -1,6 +1,6 @@
 {
   "name": "langbench",
-  "version": "0.4.0",
+  "version": "0.9.0",
   "description": "application for the benchmark of programming languages | programs",
   "main": "run.js",
   "repository": {

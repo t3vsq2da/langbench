@@ -69,7 +69,7 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
         langI + 1
       }/${langsL}] "${tName}" (${lName})`,
     currentAttempt: (testName, attempsCount, langName, input, stat, attemptI) =>
-      `${testName}[${input}] {${langName}} attempt ${
+      `${testName}{${input}} (${langName}) attempt ${
         attemptI + 1
       }/${attempsCount} : ` + msgs.benchEntires(stat),
     currentAssert: (assertI, assertsL, input) =>

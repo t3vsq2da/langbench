@@ -21,7 +21,10 @@ import { default as nodeOS } from "node:os";
 class LaunchOptions {
   constructor(vargs) {
     if (vargs.includes("--help") || vargs.includes("-help")) {
-      console.log(helpMsg);
+      this.t = this.l = [ALL];
+      this.m = "detailed";
+      this.loadConfigs();
+      console.log(helpMsg(Object.keys(this.langs), Object.keys(this.tests)));
       return {};
     }
 
@@ -229,7 +232,10 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
 
 export default LaunchOptions;
 
-const helpMsg = `available options:
+const helpMsg = (langs, tests) => `available:
+  tests:${tests.join(", ")}
+  langs:${langs.join(", ")}
+available options:
   '-t' - to specify the names of the tests to be run
   '-l' - to specify the names of the langs to be run
   '-m' - mode

@@ -23,8 +23,10 @@ curl -LO https://github.com/ocaml/ocaml/releases/download/5.4.0/ocaml-5.4.0.tar.
 tar -xzf ocaml-5.4.0.tar.gz
 cd ocaml-5.4.0
 ./configure
+sudo make 
 sudo make install
 cd ../
+rm ocaml-5.4.0.tar.gz
 rm -fdr ocaml-5.4.0
 #haskell
 cabal update
