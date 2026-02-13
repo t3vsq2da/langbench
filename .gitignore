@@ -12,3 +12,5 @@ python/__pycache__/*
 
 node_modules/*
 tmp/*
+
+bench-result.*

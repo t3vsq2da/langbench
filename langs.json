@@ -62,7 +62,7 @@
   },
   "nim":{
     "req":["nim"],
-    "build":"nim c -d:release --threads:on --profiler:on --verbosity:0 --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src>"
+    "build":"nim c -d:release -d:useMalloc --threads:on --profiler:on --verbosity:0 --opt:speed --passC:\"-march=native\" --passL:\"-s\"  -o=<out> <src>"
   },
   "go":{
     "req":["go"],
