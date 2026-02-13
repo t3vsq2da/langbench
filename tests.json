@@ -6,8 +6,9 @@
       "34":5702887,
       "36":14930352,
       "37":24157817,
-      "++38":39088169,
-      "!!39":63245986
+      "38":39088169,
+      "++39":63245986,
+      "!!40":102334155
     }
   },
   "monte-carlo":{
@@ -18,9 +19,8 @@
       "11111111":null,
       "22222222":null,
       "33333333":null,
-      "++44444444":null,
-      "++55555555":null,
-      "!!66666666":null
+      "++50005555":null,
+      "!!70006666":null
     }
   },
   "fileio":{
@@ -39,25 +39,25 @@
     "src":"parallelMonte",
     "multiThreads":true,
     "asserts":{
-      "<threads> 1222222":null,
+      "<threads> 1112222":null,
       "<threads> 6666666":null,
-      "<threads> 11111111":null,
-      "++<threads> 33333333":null,
-      "!!<threads> 44444444":null
+      "<threads> 12111111":null,
+      "++<threads> 30333333":null,
+      "!!<threads> 46400444":null
     }
   },
   "server":{
     "src":"server",
     "multi-threads":true,
-    "//":"Parallel http server that processes post requests",
+    "//":"Parallel http server that processes post requests. Reads a number from the request body and adds it to the counter. As soon as the <argv[1]> requests are processed, the program ends by outputting a counter",
     "//":"Need port 8080",
     "before":"oha -c 222 -z 6666s -m POST -H \"Content-Type: application/json\" -d '{\"data\":10}' http://localhost:8080/",
     "asserts":{
       "111":1110,
-      "876":8760,
+      "1234":12340,
       "9999":99990,
-      "++22222":222220,
-      "!!33333":333330
+      "++25555":255550,
+      "!!48814":488140
     }
   },
   "--sleep":{

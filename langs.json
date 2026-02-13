@@ -26,7 +26,7 @@
   },
   "haskell":{
     "req":["ghc"],
-    "build":"ghc -package bytestring -package network -dynamic -Wno-x-partial -threaded -rtsopts -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
+    "build":"ghc -package directory -package bytestring -package network -dynamic -Wno-x-partial -threaded -rtsopts -O2 -rtsopts -with-rtsopts=\"-A32m -H32m\" <src> -o <out>",
     "run":"./<app> <input> +RTS -N<threads-count>",
     "ext":"hs"
   },
