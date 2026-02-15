@@ -50,22 +50,24 @@ const pwdPaths = {
   root: rootFolder,
 };
 
-const preprocessed = (cmd, args, pwd, silent) => {
+const preprocessed = (cmd, args, pwd, pidRef) => {
   pwd = pwdPaths[pwd ?? "root"];
 
   if (isEmpty(args)) args = [];
   else if (typeof args === "string") args = [args];
-  return [cmd, args, pwd, silent];
+  return [cmd, args, pwd, pidRef];
 };
 
-const _exec = (cmd, args, pwd, silent) => {
+const _exec = (cmd, args, pwd, pidRef) => {
   return new Promise((resolve, reject) => {
-    if (!silent) log("c", "(", pwd, ")", [cmd, ...args].join(" "));
+    log("c", "(", pwd, ")", [cmd, ...args].join(" "));
 
     const child = nodeSpawn(cmd, args, {
       stdio: ["pipe", "pipe", "pipe"],
       cwd: pwd,
     });
+
+    if (pidRef) pidRef.pid = child.pid;
 
     let stdout = "";
     let stderr = "";
@@ -88,78 +90,28 @@ const _exec = (cmd, args, pwd, silent) => {
   });
 };
 
-export const exec = async (cmd, args, pwd, silent) => {
-  return await _exec(...preprocessed(cmd, args, pwd, silent));
-};
-
-export const spawn = (cmd, args, pwd, viewDebug) => {
-  [cmd, args, pwd, viewDebug] = preprocessed(cmd, args, pwd, viewDebug);
-
-  if (!viewDebug) log("c", "(ss", pwd, ")[async]", [cmd, ...args].join(" "));
-
-  const child = nodeSpawn(cmd, args, {
-    stdio: ["pipe", "pipe", "pipe"],
-    cwd: pwd,
-  });
-
-  let stdout = "";
-  let stderr = "";
-
-  child.on("error", () => {
-    throw new LBError(msgs.utils.execCommandFail(cmd + " " + args.join(" ")));
-  });
-
-  child.stdout.on("data", (data) => (stdout += data.toString()));
-
-  child.stderr.on("data", (data) => (stderr += data.toString()));
-
-  child.on("close", (code) =>
-    log("d", "cmd-result", {
-      stdout: stdout.trim(),
-      stderr: stderr.trim(),
-      code,
-      pid: child.pid,
-    }),
-  );
-
-  return child.pid;
-};
+export const exec = (cmd, args, pwd, pidRef) =>
+  _exec(...preprocessed(cmd, args, pwd, pidRef));
 
 //use Cmd.stat(cmd, [input], "tmp");
-export const stat = async (cmd, args, pwd, silent) => {
-  [cmd, args, pwd, silent] = preprocessed(cmd, args, pwd);
-  args.unshift("-f", "'%U %S %M %P'", /* "taskset", "-c", "0", */ cmd);
+export const stat = async (cmd, args, pwd, pidRef) => {
+  [cmd, args, pwd] = preprocessed(cmd, args, pwd);
+  args.unshift("-f", "'%U %S %M %P %e'", cmd);
   cmd = "/usr/bin/time";
-
-  const { stdout, stderr, code } = await _exec(cmd, args, pwd, silent);
+  const { stdout, stderr, code } = await _exec(cmd, args, pwd, pidRef);
 
   const stderrLines = stderr.split("\n");
   stderrLines.pop();
 
-  if (code)
-    throw new LBError(
-      msgs.utils.execCommandFail(
-        cmd + " " + args.join(" "),
-        stdout,
-        stderrLines.join("\n"),
-        code,
-      ),
-    );
+  if (code) throw new LBError(msgs.utils.execCommandFail(...infoE()));
 
   const lastLine = stderr.split("\n").at(-1);
-  const splittedRes = lastLine.replace(/^'|'$/, "").split(" ");
+  const splittedRes = lastLine.replaceAll(/^'|'$/g, "").split(" ");
 
-  if (splittedRes.length != 4)
-    throw new LBError(
-      msgs.utils.incorrectOutput(
-        cmd + " " + args.join(" "),
-        stdout,
-        stderrLines.join("\n"),
-        code,
-      ),
-    );
+  if (splittedRes.length != 5)
+    throw new LBError(msgs.utils.incorrectOutput(...infoE()));
 
-  const [utime, stime, mem, cpu] = splittedRes;
+  const [utime, stime, mem, cpu, etime] = splittedRes;
 
   return {
     stdout,
@@ -168,7 +120,12 @@ export const stat = async (cmd, args, pwd, silent) => {
       time: Number(utime) + Number(stime),
       mem: Number(mem),
       cpu: parseInt(cpu),
+      etime: Number(etime),
     },
     code,
   };
+
+  function infoE() {
+    return [cmd + " " + args.join(" "), stdout, stderrLines.join("\n"), code];
+  }
 };

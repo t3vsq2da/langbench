@@ -185,7 +185,6 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
         "lsblk",
         ["-d", "-o", "NAME,MODEL,SERIAL,SIZE,TRAN", "--json"],
         "root",
-        1,
       );
       return (
         JSON.parse(stdout)

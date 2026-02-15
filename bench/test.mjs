@@ -22,21 +22,29 @@ export default class Test {
   }
 
   bestStat = async (cmd, input, expectedOut) => {
-    let best;
     if (input)
       if (cmd.includes("<input>")) cmd = cmd.replaceAll("<input>", input);
       else cmd += " " + input;
 
+    let best;
     for (let i = 0; i < Test.attempts; ++i) {
       let beforePid;
+      let assertRes;
 
-      if (this.before) beforePid = Cmd.spawn(...fromStr(this.before));
-      const { stdout, stat, code, stderr } = await Cmd.stat(
-        ...fromStr(cmd),
-        "tmp",
-      );
+      try {
+        if (this.before) {
+          const pidRef = {};
+          Cmd.exec(...fromStr(this.before), null, pidRef);
+          beforePid = pidRef.pid;
+        }
 
-      if (beforePid) process.kill(log("d", "kill", beforePid), "SIGKILL");
+        assertRes = await Cmd.stat(...fromStr(cmd), "tmp");
+      } finally {
+        if (beforePid) process.kill(log("d", "kill", beforePid), "SIGKILL");
+      }
+
+      const { stdout, stat, code, stderr } = assertRes;
+
       this.logAttempt(input, stat, i);
       if (
         expectedOut != null &&

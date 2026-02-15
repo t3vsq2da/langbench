@@ -76,7 +76,7 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
       `[ assert:${assertI + 1}/${assertsL} ] input:{${input}}`,
   },
   benchEntires: (e) =>
-    `t:${format.time(e.time)} m:${format.mem(e.mem)} cpu%:${e.cpu}`,
+    `t:${format.time(e.time)} m:${format.mem(e.mem)} cpu%:${e.cpu} e:${format.time(e.etime)}`,
   table: (title, headers, rows) => {
     headers = headers.map((h) => h.toString().trim());
     rows = rows.map((row) => row.map((ceil) => ceil.toString().trim()));
