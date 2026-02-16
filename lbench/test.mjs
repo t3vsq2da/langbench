@@ -22,9 +22,21 @@ export default class Test {
   }
 
   bestStat = async (cmd, input, expectedOut) => {
-    if (input)
-      if (cmd.includes("<input>")) cmd = cmd.replaceAll("<input>", input);
-      else cmd += " " + input;
+    let before = this.before;
+    let beforeInput, runInput;
+    if (input) {
+      const idx = input?.indexOf("||");
+      if (idx === -1) {
+        runInput = input;
+      } else {
+        beforeInput = input.slice(0, idx);
+        runInput = input.slice(idx + 2);
+      }
+      if (cmd.includes("<input>")) cmd = cmd.replaceAll("<input>", runInput);
+      else cmd += " " + runInput;
+
+      before = before?.replaceAll("<input>", beforeInput ?? "");
+    }
 
     let best;
     for (let i = 0; i < Test.attempts; ++i) {
@@ -32,9 +44,9 @@ export default class Test {
       let assertRes;
 
       try {
-        if (this.before) {
+        if (before) {
           const pidRef = {};
-          Cmd.exec(...fromStr(this.before), null, pidRef);
+          Cmd.exec(...fromStr(before), null, pidRef);
           beforePid = pidRef.pid;
         }
 
@@ -45,7 +57,7 @@ export default class Test {
 
       const { stdout, stat, code, stderr } = assertRes;
 
-      this.logAttempt(input, stat, i);
+      this.logAttempt(runInput, stat, i);
       if (
         expectedOut != null &&
         stdout.toString().trim() != expectedOut.toString().trim()

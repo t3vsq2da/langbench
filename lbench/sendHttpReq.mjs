@@ -1,11 +1,8 @@
 import http from "http";
 
-const CONCURRENCY = +process.argv[2] || 10;
-const RPS_PER_CONN = +process.argv[3] || 10;
+const CONCURRENCY = +process.argv[2] || 20;
+const RPS_PER_CONN = +process.argv[3] || 20;
 const INTERVAL_MS = 1000 / RPS_PER_CONN;
-
-const body = '{"data":10}';
-const bodyLength = Buffer.byteLength(body); // ← точная длина в байтах
 
 const agent = new http.Agent({
   keepAlive: true,
@@ -13,8 +10,16 @@ const agent = new http.Agent({
   keepAliveMsecs: 60000,
 });
 
-function startWorker() {
+function lcg(state, m = 1337911) {
+  return (48271 * state + 1) % m;
+}
+let toBody = (n) => `{"data":${n}}`;
+function startWorker(seed) {
+  const sSeed = seed % 20;
   const send = () => {
+    const body = toBody(((seed = lcg(seed)), 10));
+    const bodyLength = Buffer.byteLength(body);
+
     const req = http.request(
       {
         host: "127.0.0.1",
@@ -23,7 +28,7 @@ function startWorker() {
         path: "/",
         headers: {
           "Content-Type": "application/json",
-          "Content-Length": bodyLength, // ← явно задаём!
+          "Content-Length": bodyLength,
         },
         agent,
       },
@@ -32,10 +37,12 @@ function startWorker() {
       },
     );
     req.on("error", () => {});
-    req.end(body); // ← сразу end(), без write()
+    req.end(body);
     setTimeout(send, INTERVAL_MS);
   };
   send();
 }
-
-for (let i = 0; i < CONCURRENCY; i++) startWorker();
+let lastsseed = 1161;
+for (let i = 0; i < CONCURRENCY; i++) {
+  startWorker((lastsseed = lcg(lastsseed, 9999991)));
+}

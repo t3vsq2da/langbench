@@ -51,13 +51,15 @@
     "multi-threads":true,
     "//":"Parallel http server that processes post requests. Reads a number from the request body and adds it to the counter. As soon as the <argv[1]> requests are processed, the program ends by outputting a counter",
     "//":"Need port 8080",
-    "before":"oha -c 222 -z 6666s -m POST -H \"Content-Type: application/json\" -d '{\"data\":10}' http://localhost:8080/",
+    "before":"node ./lbench/sendHttpReq.mjs <input>",
     "asserts":{
-      "111":1110,
-      "2590":25900,
-      "10500":105000,
-      "++20002":200020,
-      "!!30114":301140
+      "100":1000,
+      "|| 110":1100,
+      "10 10|| 120":1200,
+      "10 11|| 120":1200,
+      "--10500":105000,
+      "--20002":200020,
+      "--30114":301140
     }
   },
   "--sleep":{
