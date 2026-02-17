@@ -1,12 +1,5 @@
 #!/usr/bin/env node
-import {
-  LBError,
-  Cmd,
-  isEmpty,
-  setLog,
-  log,
-  Entries,
-} from "./lbench/utils.mjs";
+import { LBError, Cmd, Entries, show, isArray } from "./lbench/utils.mjs";
 import msgs, { format } from "./lbench/msgs.mjs";
 import LaunchOptions from "./lbench/launchOptions.mjs";
 import fs from "node:fs";
@@ -17,15 +10,8 @@ import { fromStr } from "./lbench/cmd.mjs";
 
 let launchOptions;
 
-let jsonFileObj;
-
-let tableFileAppned;
-let tableFileText;
-
-const benchEntries = [];
-
 async function main(langsCfg, testsCfg) {
-  log("s", "init tests&langs");
+  show("s", "init tests&langs");
 
   const langs = Object.entries(langsCfg).map(
     ([name, data]) => new Lang(name, data),
@@ -35,46 +21,31 @@ async function main(langsCfg, testsCfg) {
     ([name, data]) => new Test(name, data),
   );
 
-  log("s", "check langs src");
+  show("s", "check langs src");
   tests.forEach(({ src }) => langs.forEach((lang) => lang.findSrc(src)));
 
-  log("s", "run langs setup cmds");
+  show("s", "run langs setup cmds");
   for (const l of langs) if (l.setup) await Cmd.exec(...fromStr(l.setup));
-
-  log("d", "langs", langs);
-  log("d", "tests", tests);
 
   fs.rmSync("tmp", { recursive: true, force: true });
   fs.mkdirSync("tmp");
 
+  const benchEntries = [];
   let startBenchTime = Date.now();
 
   for (let i = 0; i < tests.length; ++i) {
     const test = tests[i];
-    log("s", `start test '${test.name}'`);
+    show("s", msgs.tests.current(i, tests.length, test.name));
 
-    const logCbStage = (tName, lName, langI) =>
-      log(
-        "s",
-        msgs.tests.currentLang(
-          tests.length,
-          langs.length,
-          tName,
-          lName,
-          i,
-          langI,
-        ),
-      );
-    const lBenchEntries = await test.benchLangs(langs, logCbStage);
+    const lBenchEntries = await test.benchLangs(langs);
 
-    Entries.outEntriesTest(structuredClone(lBenchEntries));
+    Entries.showTest(lBenchEntries);
     benchEntries.push(...lBenchEntries);
   }
 
   Entries.outEntriesTotal(benchEntries);
-
-  log("");
-  log(
+  show("o", "");
+  show(
     "s",
     "the benchmark was completed in " +
       format.time((Date.now() - startBenchTime) / 1000),
@@ -84,28 +55,29 @@ async function main(langsCfg, testsCfg) {
 const mainWrapper = async () => {
   try {
     launchOptions = new LaunchOptions(process.argv);
-    if (isEmpty(launchOptions)) return 0;
-
+    if (launchOptions.abort) return 0;
     await launchOptions.init();
-    if (isEmpty(launchOptions.langs) || isEmpty(launchOptions.tests)) return;
 
-    outsFiles.init();
-    outsFiles.writeLo(log("lo", launchOptions.toString()));
+    launchOptions.v?.forEach((cat) => (show.categories[cat].enabled = true));
+    jsonOut.add({
+      launchOptions: show("o", txtOut.add(launchOptions.toString())),
+    });
 
     Test.attempts = launchOptions.ac;
     Test.maxThreads = launchOptions.mt;
-    Test.onLogAsserts = launchOptions.ls == 2;
-    Entries.outSetSetting(launchOptions.li, tableFileAppned, jsonFileObj);
+
+    Entries.setJsonOut(jsonOut);
+    Entries.setTxtOut(txtOut);
 
     await main(launchOptions.langs, launchOptions.tests);
-
-    outsFiles.save();
   } catch (err) {
     if (err instanceof LBError) {
       console.error("\nLANG BENCH ERROR!");
       console.error(err.message);
     } else console.error(err);
   } finally {
+    txtOut.save();
+    jsonOut.save();
     if (fs.existsSync("tmp"))
       fs.rmSync("tmp", { force: true, recursive: true });
   }
@@ -113,45 +85,34 @@ const mainWrapper = async () => {
 
 mainWrapper();
 
-const outsFiles = {
-  init: () => {
-    if (launchOptions.srt) {
-      tableFileText = "";
-      tableFileAppned = launchOptions.srt
-        ? (txt) => (tableFileText += (txt != null ? txt : "") + "\n")
-        : null;
-    }
-    if (launchOptions.srj) jsonFileObj = { total: null, entries: [] };
+const txtOut = {
+  text: "",
+  add(t) {
+    this.text += t;
+    return t;
   },
-  writeLo: (lo) => {
-    tableFileAppned?.("launch options:\n" + lo + "\n");
-    if (jsonFileObj && launchOptions.llo) jsonFileObj["launch options"] = lo;
-  },
-  save: () => {
-    if (launchOptions.srt) fs.writeFileSync("bench-result.txt", tableFileText);
-
-    if (launchOptions.srj)
-      fs.writeFileSync("bench-result.json", JSON.stringify(jsonFileObj));
+  save() {
+    fs.writeFileSync("bench-result.txt", this.text);
   },
 };
 
-setLog((head, ...tail) => {
-  if (isEmpty(tail)) {
-    console.log(head);
-    return head;
-  } else if (launchOptions["l" + head]) {
-    const prefix = log.prefixs[head];
-    if (prefix) console.log(prefix, ...tail);
-    else console.log(tail);
-  }
-  return tail.at(-1);
-});
-
-log.prefixs = {
-  i: "[i]", //individual
-  s: "[s]", //stage
-  c: "[c]", //command
-  a: "[a]", //attempt
-  d: "[d]", //debug
-  lo: "[lo]", //launch options
+const jsonOut = {
+  obj: { entries: [] },
+  set(fields) {
+    for (let k in fields) this.obj[k] = fields[k];
+    return fields;
+  },
+  add(fields) {
+    for (let k in fields) {
+      const o = this.obj;
+      if (k in o)
+        if (isArray(o[k])) o[k].push(...fields[k]);
+        else o[k] = [o[k], fields[k]];
+      else o[k] = fields[k];
+    }
+    return fields;
+  },
+  save() {
+    fs.writeFileSync("bench-result.json", JSON.stringify(this.obj));
+  },
 };

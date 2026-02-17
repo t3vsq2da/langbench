@@ -2,9 +2,8 @@ import { fromStr } from "./cmd.mjs";
 import {
   excludeDisabled,
   msgs,
-  log,
   LBError,
-  ALL,
+  show,
   Cmd,
   Entries,
 } from "./utils.mjs";
@@ -12,7 +11,6 @@ import fs from "fs";
 
 export default class Test {
   static attempts;
-  static onLogAsserts;
   static compareAttempts = (a, b) => a.time - b.time || a.mem - b.mem;
 
   constructor(name, data) {
@@ -41,7 +39,7 @@ export default class Test {
     let best;
     for (let i = 0; i < Test.attempts; ++i) {
       let beforePid;
-      let assertRes;
+      let caseRes;
 
       try {
         if (before) {
@@ -50,14 +48,14 @@ export default class Test {
           beforePid = pidRef.pid;
         }
 
-        assertRes = await Cmd.stat(...fromStr(cmd), "tmp");
+        caseRes = await Cmd.stat(...fromStr(cmd), "tmp");
       } finally {
-        if (beforePid) process.kill(log("d", "kill", beforePid), "SIGKILL");
+        if (beforePid) process.kill(beforePid, "SIGKILL");
       }
 
-      const { stdout, stat, code, stderr } = assertRes;
+      const { stdout, stat, code, stderr } = caseRes;
 
-      this.logAttempt(runInput, stat, i);
+      show("as", msgs.tests.currentAttempt(i, Test.attempts, stat));
       if (
         expectedOut != null &&
         stdout.toString().trim() != expectedOut.toString().trim()
@@ -85,37 +83,26 @@ export default class Test {
   bench = async (cmd) => {
     const stats = {};
 
-    if (this.asserts && Object.keys(this.asserts).length) {
-      const assertsKeys = Object.keys(this.asserts);
-      for (let i = 0; i < assertsKeys.length; ++i) {
-        const input = assertsKeys[i].replaceAll("<threads>", Test.maxThreads);
+    if (this.cases && Object.keys(this.cases).length) {
+      const casesKeys = Object.keys(this.cases);
+      for (let i = 0; i < casesKeys.length; ++i) {
+        const input = casesKeys[i].replaceAll("<threads>", Test.maxThreads);
 
-        if (Test.onLogAsserts)
-          log("s", msgs.tests.currentAssert(i, assertsKeys.length, input));
+        show("cs", msgs.tests.currentCase(i, casesKeys.length, input));
 
-        stats[input] = await this.bestStat(cmd, input, this.asserts[input]);
+        stats[input] = await this.bestStat(cmd, input, this.cases[input]);
       }
-    } else stats[""] = await this.bestStat(cmd, null, null);
+    } else stats[""] = await this.bestStat(cmd);
     return stats;
   };
 
-  benchLangs = async (langs, logCb) => {
+  benchLangs = async (langs) => {
     const lBenchEntries = [];
     const appName = this.src;
     for (let j = 0; j < langs.length; ++j) {
       const lang = langs[j];
-      this.logAttempt = (input, stat, attemptI) =>
-        log(
-          "a",
-          msgs.tests.currentAttempt(
-            this.name,
-            Test.attempts,
-            lang.name,
-            input,
-            stat,
-            attemptI,
-          ),
-        );
+      show("s", msgs.tests.currentLang(j, langs.length, lang.name));
+
       let buildStat;
       if (lang.build) buildStat = await lang.buildStat(appName);
 
@@ -127,8 +114,6 @@ export default class Test {
         " " +
         lang.getRunCmd(appName).replaceAll("<threads-count>", threads);
 
-      logCb(this.name, lang.name, j);
-      log("d", "tmp folder", fs.readdirSync("./tmp"));
       const benchResult = await this.bench(cmdRun);
 
       lBenchEntries.push(

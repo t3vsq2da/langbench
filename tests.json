@@ -2,7 +2,7 @@
   "fib":{
     "//":"Naive recursive algorithm for calculating Fibonacci numbers",
     "//":"The argument is the Fibonacci number",
-    "asserts":{
+    "cases":{
       "34":5702887,
       "36":14930352,
       "37":24157817,
@@ -15,7 +15,7 @@
     "//":"monte",
     "//":"The argument is the number of iterations in the loop",
     "src":"monte",
-    "asserts":{
+    "cases":{
       "11111111":null,
       "22222222":null,
       "33333333":null,
@@ -28,7 +28,7 @@
     "//":"Сreates a lot of files in the tmp directory, be careful",
     "//":"Сreates a lot of files, fills them with units, and then counts the number of 64Kb chunks",
     "//":"The first argument is the number of files, the second is the number of units in each file",
-    "asserts":{
+    "cases":{
       "1000 300000":4577,
       "2000 400000":12207,
       "++1100 1111111":18649,
@@ -38,7 +38,7 @@
   "parallel-monte":{
     "src":"parallelMonte",
     "multiThreads":true,
-    "asserts":{
+    "cases":{
       "<threads> 1112222":null,
       "<threads> 6666666":null,
       "<threads> 12111111":null,
@@ -52,7 +52,7 @@
     "//":"Parallel http server that processes post requests. Reads a number from the request body and adds it to the counter. As soon as the <argv[1]> requests are processed, the program ends by outputting a counter",
     "//":"Need port 8080",
     "before":"node ./lbench/sendHttpReq.mjs <input>",
-    "asserts":{
+    "cases":{
       "100":1000,
       "|| 110":1100,
       "10 10|| 120":1200,
@@ -65,7 +65,7 @@
   "--sleep":{
     "//":"just checking the time measurement",
     "src":"sleep",
-    "asserts":{
+    "cases":{
       "50":null,
       "100":null
     }

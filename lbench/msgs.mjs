@@ -17,6 +17,7 @@ os: ${os.platform}(${os.release}) arch:${os.arch}`,
       `name ${name} was not found in config ${file}`,
     needReq: (nameE, req) => `requires dependency '${req}' for '${nameE}'`,
   },
+
   utils: {
     execCommandFail: (
       cmd,
@@ -51,6 +52,7 @@ cmd:'${cmd}' code:'${code}'
 [stdout-start]\n${stdout}\n[stdout-start]\
 ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
   },
+
   langs: {
     srcNoFound: (lang, folder, name) =>
       `src '${name}' in dir '${folder}' for language '${lang}' was not found.`,
@@ -61,22 +63,19 @@ ${stderr?.trim().length ? `\n[stderr-start]\n${stderr}\n[stderr-end]` : ""}`,
     langNoRun: (langName) =>
       `it is not possible to define a command to run in language '${langName}'`,
   },
+
   tests: {
     missedFieldTest: (tName, field) =>
       `missing field '${field}' in test configuration '${tName}'`,
-    currentLang: (testsL, langsL, tName, lName, testI, langI) =>
-      `[test ${testI + 1}/${testsL} | lang ${
-        langI + 1
-      }/${langsL}] "${tName}" (${lName})`,
-    currentAttempt: (testName, attempsCount, langName, input, stat, attemptI) =>
-      `${testName}{${input}} (${langName}) attempt ${
-        attemptI + 1
-      }/${attempsCount} : ` + msgs.benchEntires(stat),
-    currentAssert: (assertI, assertsL, input) =>
-      `[ assert:${assertI + 1}/${assertsL} ] input:{${input}}`,
+    current: (i, len, name) => `[ test ${i + 1}/${len} ] '${name}'`,
+    currentLang: (i, len, name) => `  [ lang ${i + 1}/${len} ] (${name})`,
+    currentAttempt: (i, len, stat) =>
+      `      [ attempt ${i + 1}/${len} ] : ${msgs.benchEntires(stat)} `,
+    currentCase: (i, len, input) => `    [ case:${i + 1}/${len} ] {${input}}`,
   },
+
   benchEntires: (e) =>
-    `t:${format.time(e.time)} m:${format.mem(e.mem)} cpu%:${e.cpu} e:${format.time(e.etime)}`,
+    `t:${format.time(e.time)} m:${format.mem(e.mem)} cpu%:${e.cpu} elapsed-t:${format.time(e.etime)}`,
   table: (title, headers, rows) => {
     headers = headers.map((h) => h.toString().trim());
     rows = rows.map((row) => row.map((ceil) => ceil.toString().trim()));

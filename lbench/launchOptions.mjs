@@ -1,14 +1,12 @@
 import {
   pipe,
   msgs,
-  isSet,
   ALL,
   every,
   autoCast,
   isType,
   isEmpty,
   LBError,
-  map,
   opposite,
   excludeDisabled,
   Cmd,
@@ -25,7 +23,7 @@ class LaunchOptions {
       this.m = "detailed";
       this.loadConfigs();
       console.log(helpMsg(Object.keys(this.langs), Object.keys(this.tests)));
-      return {};
+      return { abort: true };
     }
 
     const rawOptions = { ...LaunchOptions.default };
@@ -76,14 +74,8 @@ langs:${Object.keys(this.langs)
 tests:${Object.keys(this.tests)
     .map((k) => "'" + k + "'")
     .join(", ")}
-logging:${this.ls ? " stages" : ""}${this.la ? " attempts" : ""}${
-    this.li == 1
-      ? " result-of-each-test"
-      : this.li == 2
-        ? " result-of-each-assert"
-        : ""
-  }${this.lc ? " commands" : ""}${this.ld ? " debug" : ""}
-save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
+logging:${this.v.map((v) => ({ et: "each-test", ec: "each-case", s: "stage", as: "attempt-stage", cs: "case-stage", c: "case" })[v]).join(", ")}
+save results:${this.sr}
   `;
 
   checkRequires = async () => {
@@ -109,16 +101,8 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
 
   validation = () => {
     const checks = {
-      t: pipe(
-        //tests
-        map((v) => v.toString().trim()),
-        every(isSet, pipe(isEmpty, opposite)),
-      ),
-      l: pipe(
-        //langs
-        map((v) => v.toString().trim()),
-        every(isSet, pipe(isEmpty, opposite)),
-      ),
+      t: pipe(isEmpty, opposite),
+      l: pipe(isEmpty, opposite),
       ac: every(isType("number"), Number.isInteger, (n) => n > 0), //attemps count
       m: every(isType("string"), (m) =>
         ["fast", "normal", "detailed"].includes(m),
@@ -128,14 +112,13 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
         Number.isInteger,
         (n) => n >= 1 && n < this.sysInfo.cpu.threads,
       ), //max count threads for multithrteads tests
-      ls: (v) => [0, 1, 2].includes(v), //log stages
-      ld: isType("boolean"), //log debug
-      lc: isType("boolean"), //log cmds
-      la: isType("boolean"), //log attempts
-      li: (v) => [0, 1, 2].includes(v), //log individual tests
-      llo: isType("boolean"), //log launchOptions
-      srj: isType("boolean"), //save result json
-      srt: isType("boolean"), //save result table
+      v: (values) =>
+        values.reduce(
+          (acc, value) =>
+            ["s", "ec", "et", "as", "cs", "c"].includes(value) && acc,
+          1,
+        ),
+      sr: isType("boolean"), //save result
     };
     const raw = this.rawOptions;
     for (let flag in raw)
@@ -218,14 +201,10 @@ save results:${this.srt ? " tables" : ""}${this.srj ? " json" : ""}
     l: [ALL],
     ac: 3, //there is almost no difference between attempts, both on isolated cores and on other cores.
     mt: null,
-    ls: 1,
-    ld: false,
-    lc: false,
-    la: false,
-    li: 1,
-    llo: true,
-    srj: false,
-    srt: true,
+    //allowed:
+    //s - stage, c - command, et - each test, ec - each case, as - attempts stage, cs - case stage, a - all
+    v: ["s", "et"],
+    sr: true,
   };
 }
 
@@ -242,10 +221,11 @@ available options:
     '-m detailed' - for a more detailed test
   '-ac' - attempts count
   '-mt' - maximum number of threads
-  '-ls' - log stages
-  '-lc' - log (sys)commands
-  '-la' - log attempts
-  '-li' - log of results for each of the tests
-  '-llo' - log launch options
-  '-srj' - save result json
-  '-srt' - save result table`;
+  '-v'  - visible messages - list of:
+    * s - stage
+    * et - each test
+    * ec - each case
+    * as - attempt stage
+    * cs - case stage
+    * c - commands
+  '-sr' - save the results as tables and as json`;

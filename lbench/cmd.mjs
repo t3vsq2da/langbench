@@ -1,5 +1,5 @@
 import { spawn as nodeSpawn } from "child_process";
-import { log, LBError, msgs, isEmpty } from "./utils.mjs";
+import { LBError, msgs, isEmpty, show } from "./utils.mjs";
 import process from "process";
 import path from "path";
 
@@ -60,7 +60,7 @@ const preprocessed = (cmd, args, pwd, pidRef) => {
 
 const _exec = (cmd, args, pwd, pidRef) => {
   return new Promise((resolve, reject) => {
-    log("c", "(", pwd, ")", [cmd, ...args].join(" "));
+    show("c", "(", pwd, ")", [cmd, ...args].join(" "));
 
     const child = nodeSpawn(cmd, args, {
       stdio: ["pipe", "pipe", "pipe"],
@@ -79,13 +79,11 @@ const _exec = (cmd, args, pwd, pidRef) => {
     child.on("error", reject);
 
     child.on("close", (code) =>
-      resolve(
-        log("d", "cmd-result", {
-          stdout: stdout.trim(),
-          stderr: stderr.trim(),
-          code,
-        }),
-      ),
+      resolve({
+        stdout: stdout.trim(),
+        stderr: stderr.trim(),
+        code,
+      }),
     );
   });
 };
